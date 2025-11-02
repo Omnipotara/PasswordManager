@@ -11,7 +11,7 @@ import BCrypt.src.org.mindrot.jbcrypt.BCrypt;
  */
 public class HashUtils {
     public static String hashPassword(String password){
-        return BCrypt.hashpw(password, BCrypt.gensalt(12));
+        return BCrypt.hashpw(password, BCrypt.gensalt(10));
     }
     
     public static boolean checkPassword(String password, String hash){

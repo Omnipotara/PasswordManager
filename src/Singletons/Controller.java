@@ -4,12 +4,16 @@
  */
 package Singletons;
 
+import Database.DBBroker;
+import Model.User;
+
 /**
  *
  * @author Omnix
  */
 public class Controller {
     private static Controller instance;
+    private DBBroker dbb;
     
     public static Controller getInstance() {
         if (instance == null) {
@@ -19,6 +23,11 @@ public class Controller {
     }
 
     private Controller() {
+        dbb = new DBBroker();
+    }
+
+    public int insertUser(User u) {
+        return dbb.userExists(u.getUsername()) ? -1 : dbb.insertUser(u);
     }
     
     

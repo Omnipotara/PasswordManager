@@ -38,7 +38,7 @@ public class DBConnection {
             String pass = "ognjen";
 
             connection = DriverManager.getConnection(url, user, pass);
-            connection.setAutoCommit(false);
+            connection.setAutoCommit(true);
 
         } catch (SQLException ex) {
             Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
