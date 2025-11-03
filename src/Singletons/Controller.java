@@ -29,6 +29,10 @@ public class Controller {
     public int insertUser(User u) {
         return dbb.userExists(u.getUsername()) ? -1 : dbb.insertUser(u);
     }
+
+    public User loginUser(String username, String password) {
+        return dbb.selectUser(username, password);
+    }
     
     
 }

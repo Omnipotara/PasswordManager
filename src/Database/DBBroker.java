@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class DBBroker {
 
-    public boolean userExists(String username){
+    public boolean userExists(String username) {
         try {
             String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
@@ -32,19 +32,49 @@ public class DBBroker {
 
     public int insertUser(User u) {
         String passwordHashed = HashUtils.hashPassword(u.getPassword());
-        
+
         try {
             String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
             ps.setString(1, u.getUsername());
             ps.setString(2, passwordHashed);
-            
+
             int rows = ps.executeUpdate();
             return rows > 0 ? 1 : 0;
         } catch (SQLException ex) {
             Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
             return 0;
         }
+    }
+
+    public User selectUser(String username, String password) {
+        User u = new User();
+        u.setUsername(username);
+
+        try {
+            String sql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ps.setString(1, username);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String password_db = rs.getString("password");
+
+                if (HashUtils.checkPassword(password, password_db)) {
+                    int userID_db = rs.getInt("id");
+                    u.setId(userID_db);
+                } else {
+                    u.setId(-1);
+                }
+            } else {
+                u.setId(-1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+            u.setId(-1);
+            return u;
+        }
+        return u;
     }
 
 }

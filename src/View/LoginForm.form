@@ -24,17 +24,15 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="83" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="119" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="txtUsername" max="32767" attributes="0"/>
+                  <Component id="txtUsername" pref="220" max="32767" attributes="0"/>
                   <Component id="txtPassword" max="32767" attributes="0"/>
-                  <Component id="txtPassword1" alignment="0" pref="220" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="btnShow" min="-2" pref="59" max="-2" attributes="0"/>
@@ -43,15 +41,13 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="btnLogin" min="-2" pref="185" max="-2" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="btnRegister" min="-2" pref="185" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="150" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="btnLogin" min="-2" pref="86" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="201" max="-2" attributes="0"/>
+                      <Component id="btnRegister" min="-2" pref="86" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="53" max="-2" attributes="0"/>
                   </Group>
               </Group>
+              <EmptySpace min="-2" pref="147" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -64,25 +60,18 @@
                   <Component id="txtUsername" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtPassword" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtPassword1" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtPassword" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="btnShow" pref="63" max="32767" attributes="0"/>
+                  <Component id="btnShow" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="btnRegister" min="-2" pref="70" max="-2" attributes="0"/>
+              <Component id="btnLogin" min="-2" pref="70" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="btnLogin" min="-2" pref="37" max="-2" attributes="0"/>
-              <EmptySpace pref="14" max="32767" attributes="0"/>
+              <Component id="btnRegister" min="-2" pref="37" max="-2" attributes="0"/>
+              <EmptySpace pref="27" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -98,11 +87,6 @@
         <Property name="text" type="java.lang.String" value="Password"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel3">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Repeat Password"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JTextField" name="txtUsername">
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtUsernameActionPerformed"/>
@@ -110,17 +94,15 @@
     </Component>
     <Component class="javax.swing.JPasswordField" name="txtPassword">
     </Component>
-    <Component class="javax.swing.JPasswordField" name="txtPassword1">
-    </Component>
-    <Component class="javax.swing.JButton" name="btnRegister">
+    <Component class="javax.swing.JButton" name="btnLogin">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Segoe UI" size="36" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Register"/>
+        <Property name="text" type="java.lang.String" value="Log in"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRegisterActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoginActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnShow">
@@ -131,15 +113,15 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnShowActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="btnLogin">
+    <Component class="javax.swing.JButton" name="btnRegister">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Segoe UI" size="12" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Login"/>
+        <Property name="text" type="java.lang.String" value="Register"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnLoginActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnRegisterActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

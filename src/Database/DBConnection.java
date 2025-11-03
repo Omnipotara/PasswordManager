@@ -33,7 +33,7 @@ public class DBConnection {
     private DBConnection() {
         try {
             
-            String url = "jdbc:mysql://localhost:3306/ecaffe_db?useSSL=false&serverTimezone=UTC";
+            String url = "jdbc:mysql://localhost:3306/passwordmanager_db?useSSL=false&serverTimezone=UTC";
             String user = "root";
             String pass = "ognjen";
 
