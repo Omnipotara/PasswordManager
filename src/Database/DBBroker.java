@@ -50,6 +50,7 @@ public class DBBroker {
     public User selectUser(String username, String password) {
         User u = new User();
         u.setUsername(username);
+        u.setPassword(password);
 
         try {
             String sql = "SELECT * FROM users WHERE username = ?";

@@ -8,17 +8,17 @@ package Model;
  *
  * @author Omnix
  */
-public class passwordEntry {
+public class PasswordEntry {
     private int id;
     private int userId;
     private String username;
     private String password;
     private String description;
 
-    public passwordEntry() {
+    public PasswordEntry() {
     }
 
-    public passwordEntry(int id, int userId, String username, String password, String description) {
+    public PasswordEntry(int id, int userId, String username, String password, String description) {
         this.id = id;
         this.userId = userId;
         this.username = username;
