@@ -5,13 +5,14 @@
         <group>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Database/DBConnection.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/View/MainForm.java</file>
+            <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Model/PasswordEntry.java</file>
+            <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Model/EntryTableModel.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Singletons/Controller.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Database/DBBroker.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Cryptography/HashUtils.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Model/User.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/View/LoginForm.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Cryptography/CryptoUtils.java</file>
-            <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/Model/passwordEntry.java</file>
             <file>file:/C:/Users/Omnix/Documents/NetBeansProjects/PasswordManager/src/View/RegistrationForm.java</file>
         </group>
     </open-files>

@@ -5,7 +5,9 @@
 package Singletons;
 
 import Database.DBBroker;
+import Model.PasswordEntry;
 import Model.User;
+import java.util.List;
 
 /**
  *
@@ -32,6 +34,14 @@ public class Controller {
 
     public User loginUser(String username, String password) {
         return dbb.selectUser(username, password);
+    }
+
+    public List<PasswordEntry> selectEntries(User u) {
+        return dbb.selectEntries(u);
+    }
+
+    public boolean insertEntry(PasswordEntry pe, User u) {
+        return dbb.insertEntry(pe, u);
     }
     
     
