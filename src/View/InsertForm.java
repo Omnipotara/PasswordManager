@@ -15,7 +15,9 @@ import javax.swing.JOptionPane;
  * @author Omnix
  */
 public class InsertForm extends javax.swing.JFrame {
+
     private User u;
+    private PasswordEntry pe;
 
     /**
      * Creates new form InsertForm
@@ -23,10 +25,23 @@ public class InsertForm extends javax.swing.JFrame {
     public InsertForm() {
         initComponents();
     }
-    
+
     public InsertForm(User u) {
         this.u = u;
         initComponents();
+    }
+
+    public InsertForm(User u, PasswordEntry pe) {
+        this.pe = pe;
+        this.u = u;
+        initComponents();
+        txtPassword.setEnabled(false);
+        txtUsername.setText(pe.getUsername());
+        txtPassword.setText(pe.getPassword());
+        txtPassword.setEchoChar((char) 0);
+        txtDescription.setText(pe.getDescription());
+        btnShow.setVisible(false);
+        btnInsert.setText("Update");
     }
 
     /**
@@ -151,37 +166,51 @@ public class InsertForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnShowActionPerformed
 
     private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
-        String username = txtUsername.getText().trim();
-        String password = String.valueOf(txtPassword.getPassword());
-        String description = txtDescription.getText().trim();
+        if (pe == null) {
+            String username = txtUsername.getText().trim();
+            String password = String.valueOf(txtPassword.getPassword());
+            String description = txtDescription.getText().trim();
 
-        txtUsername.setBackground(Color.white);
-        txtPassword.setBackground(Color.white);
-        txtDescription.setBackground(Color.white);
+            txtUsername.setBackground(Color.white);
+            txtPassword.setBackground(Color.white);
+            txtDescription.setBackground(Color.white);
 
-        if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Username mustn't be empty.", "Username is too short", JOptionPane.ERROR_MESSAGE);
-            txtUsername.setBackground(Color.red);
-            return;
-        }
+            if (username.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Username mustn't be empty.", "Username is too short", JOptionPane.ERROR_MESSAGE);
+                txtUsername.setBackground(Color.red);
+                return;
+            }
 
-        if (password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Password mustn't be empty.", "Password is too short", JOptionPane.ERROR_MESSAGE);
-            txtPassword.setBackground(Color.red);
-            return;
-        }
-        
-        PasswordEntry pe = new PasswordEntry();
-        pe.setUsername(username);
-        pe.setPassword(password);
-        pe.setUserId(u.getId());
-        pe.setDescription(description);
-        boolean success = Controller.getInstance().insertEntry(pe, u);
-        
-        if (success){
-            JOptionPane.showMessageDialog(this, "Good job, you've saved an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            if (password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Password mustn't be empty.", "Password is too short", JOptionPane.ERROR_MESSAGE);
+                txtPassword.setBackground(Color.red);
+                return;
+            }
+
+            PasswordEntry pe = new PasswordEntry();
+            pe.setUsername(username);
+            pe.setPassword(password);
+            pe.setUserId(u.getId());
+            pe.setDescription(description);
+            boolean success = Controller.getInstance().insertEntry(pe, u);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Good job, you've saved an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                Controller.getInstance().getMf().refreshTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "There was an error.", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
         } else {
-            JOptionPane.showMessageDialog(this, "There was an error.", "Failure", JOptionPane.ERROR_MESSAGE);
+            pe.setUsername(txtUsername.getText());
+            pe.setDescription(txtDescription.getText());
+            boolean updated = Controller.getInstance().updateEntry(pe, u);
+
+            if (updated) {
+                JOptionPane.showMessageDialog(this, "Good job, you've updated an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                Controller.getInstance().getMf().refreshTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "There was an error.", "Failure", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnInsertActionPerformed
 

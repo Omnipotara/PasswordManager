@@ -135,19 +135,51 @@ public class DBBroker {
             byte[] salt = Base64.getDecoder().decode(u.getSalt());
             SecretKey key = CryptoUtils.deriveKey(u.getPassword(), salt);
             String encryptedPassword = CryptoUtils.encrypt(pe.getPassword(), key);
-            
+
             ps.setInt(1, pe.getUserId());
             ps.setString(2, pe.getUsername());
             ps.setString(3, encryptedPassword);
             ps.setString(4, pe.getDescription());
-            
-            int inserted = ps.executeUpdate();
-            return inserted > 0;
+
+            int insertedRows = ps.executeUpdate();
+            return insertedRows > 0;
         } catch (SQLException ex) {
             Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return false;
+    }
+
+    public boolean deleteEntry(PasswordEntry pe, User u) {
+        try {
+            String sql = "DELETE FROM password_entries WHERE id = ? AND user_id = ?";
+            PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ps.setInt(1, pe.getId());
+            ps.setInt(2, u.getId());
+            int deletedRows = ps.executeUpdate();
+
+            return deletedRows > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean updateEntry(PasswordEntry pe, User u) {
+        try {
+            String sql = "UPDATE password_entries SET username = ?, description = ? WHERE id = ? AND user_id = ?";
+            PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
+            ps.setString(1, pe.getUsername());
+            ps.setString(2, pe.getDescription());
+            ps.setInt(3, pe.getId());
+            ps.setInt(4, u.getId());
+            int updatedRows = ps.executeUpdate();
+            return updatedRows > 0;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBBroker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         return false;
     }
 

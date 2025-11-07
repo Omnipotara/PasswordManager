@@ -7,6 +7,7 @@ package Singletons;
 import Database.DBBroker;
 import Model.PasswordEntry;
 import Model.User;
+import View.MainForm;
 import java.util.List;
 
 /**
@@ -16,6 +17,7 @@ import java.util.List;
 public class Controller {
     private static Controller instance;
     private DBBroker dbb;
+    private MainForm mf;
     
     public static Controller getInstance() {
         if (instance == null) {
@@ -43,6 +45,24 @@ public class Controller {
     public boolean insertEntry(PasswordEntry pe, User u) {
         return dbb.insertEntry(pe, u);
     }
+
+    public MainForm getMf() {
+        return mf;
+    }
+
+    public void setMf(MainForm mf) {
+        this.mf = mf;
+    }
+
+    public boolean deleteEntry(PasswordEntry pe, User u) {
+        return dbb.deleteEntry(pe, u);
+    }
+
+    public boolean updateEntry(PasswordEntry pe, User u) {
+        return dbb.updateEntry(pe, u);
+    }
+    
+    
     
     
 }

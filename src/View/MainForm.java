@@ -9,13 +9,16 @@ import Model.PasswordEntry;
 import Model.User;
 import Singletons.Controller;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author Omnix
  */
 public class MainForm extends javax.swing.JFrame {
+
     private User u;
+    private List<PasswordEntry> entryList;
 
     /**
      * Creates new form MainForm
@@ -23,16 +26,14 @@ public class MainForm extends javax.swing.JFrame {
     public MainForm() {
         initComponents();
     }
-    
+
     public MainForm(User u) {
+        Controller.getInstance().setMf(this);
         this.u = u;
-        List<PasswordEntry> entryList = Controller.getInstance().selectEntries(u);
-        EntryTableModel etm = new EntryTableModel(entryList);
         initComponents();
-        tblEntries.setModel(etm);
+        refreshTable();
         setTitle("Welcome " + u.getUsername() + "!");
     }
-
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -72,8 +73,18 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         btnDetails.setText("Details");
+        btnDetails.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDetailsActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -111,6 +122,42 @@ public class MainForm extends javax.swing.JFrame {
         InsertForm insf = new InsertForm(u);
         insf.setVisible(true);
     }//GEN-LAST:event_btnInsertActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        int selectedRow = tblEntries.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "You need to select an entry for deletion.", "Failure", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        EntryTableModel etm = (EntryTableModel) tblEntries.getModel();
+        PasswordEntry pe = etm.getEntryList().get(selectedRow);
+
+        boolean deleted = Controller.getInstance().deleteEntry(pe, u);
+
+        if (deleted) {
+            JOptionPane.showMessageDialog(this, "You've successfully deleted an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            refreshTable();
+        } else {
+            JOptionPane.showMessageDialog(this, "There was an error while deleting an entry.", "Failure", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    private void btnDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDetailsActionPerformed
+        int selectedRow = tblEntries.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "You need to select an entry for deletion.", "Failure", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        EntryTableModel etm = (EntryTableModel) tblEntries.getModel();
+        PasswordEntry pe = etm.getEntryList().get(selectedRow);
+
+        InsertForm insf = new InsertForm(u, pe);
+        insf.setVisible(true);
+    }//GEN-LAST:event_btnDetailsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -154,4 +201,10 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblEntries;
     // End of variables declaration//GEN-END:variables
+
+    void refreshTable() {
+        entryList = Controller.getInstance().selectEntries(u);
+        EntryTableModel etm = new EntryTableModel(entryList);
+        tblEntries.setModel(etm);
+    }
 }

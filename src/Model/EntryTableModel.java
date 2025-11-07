@@ -56,4 +56,14 @@ public class EntryTableModel extends AbstractTableModel {
         return columns[column];
     }
 
+    public List<PasswordEntry> getEntryList() {
+        return entryList;
+    }
+
+    public void setEntryList(List<PasswordEntry> entryList) {
+        this.entryList = entryList;
+    }
+    
+    
+
 }
