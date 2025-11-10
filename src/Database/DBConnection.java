@@ -4,7 +4,6 @@
  */
 package Database;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,8 +28,12 @@ public class DBConnection {
 
     private DBConnection() {
         try {
-            
-            String url = "jdbc:mysql://localhost:3306/passwordmanager_db?useSSL=false&serverTimezone=UTC";
+
+            String url = "jdbc:mysql://localhost:3306/passwordmanager_db"
+                    + "?useSSL=false"
+                    + "&allowPublicKeyRetrieval=true"
+                    + "&serverTimezone=UTC";
+
             String user = "root";
             String pass = "ognjen";
 

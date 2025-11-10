@@ -43,8 +43,7 @@ public class EntryTableModel extends AbstractTableModel {
             case 0:
                 return entry.getUsername();
             case 1:
-                //String starredPassword = "*".repeat(entry.getPassword().length());
-                String starredPassword = entry.getPassword();
+                String starredPassword = "*".repeat(entry.getPassword().length());
                 return starredPassword;
             default:
                 return "N/A";

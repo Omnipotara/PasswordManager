@@ -73,6 +73,7 @@ public class InsertForm extends javax.swing.JFrame {
         jLabel3.setText("Description:");
 
         txtDescription.setColumns(20);
+        txtDescription.setLineWrap(true);
         txtDescription.setRows(5);
         jScrollPane1.setViewportView(txtDescription);
 
@@ -197,10 +198,17 @@ public class InsertForm extends javax.swing.JFrame {
             if (success) {
                 JOptionPane.showMessageDialog(this, "Good job, you've saved an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 Controller.getInstance().getMf().refreshTable();
+                this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "There was an error.", "Failure", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         } else {
+            if (txtUsername.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Username mustn't be empty.", "Username is too short", JOptionPane.ERROR_MESSAGE);
+                txtUsername.setBackground(Color.red);
+                return;
+            }
+
             pe.setUsername(txtUsername.getText());
             pe.setDescription(txtDescription.getText());
             boolean updated = Controller.getInstance().updateEntry(pe, u);
@@ -208,8 +216,9 @@ public class InsertForm extends javax.swing.JFrame {
             if (updated) {
                 JOptionPane.showMessageDialog(this, "Good job, you've updated an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 Controller.getInstance().getMf().refreshTable();
+                this.dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "There was an error.", "Failure", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnInsertActionPerformed

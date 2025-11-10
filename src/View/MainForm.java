@@ -140,7 +140,7 @@ public class MainForm extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "You've successfully deleted an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
             refreshTable();
         } else {
-            JOptionPane.showMessageDialog(this, "There was an error while deleting an entry.", "Failure", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
@@ -148,7 +148,7 @@ public class MainForm extends javax.swing.JFrame {
         int selectedRow = tblEntries.getSelectedRow();
 
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "You need to select an entry for deletion.", "Failure", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "You need to select an entry for detailed view.", "Failure", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
