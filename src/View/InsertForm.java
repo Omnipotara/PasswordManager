@@ -36,6 +36,7 @@ public class InsertForm extends javax.swing.JFrame {
         this.u = u;
         initComponents();
         txtPassword.setEnabled(false);
+        txtService.setText(pe.getService());
         txtUsername.setText(pe.getUsername());
         txtPassword.setText(pe.getPassword());
         txtPassword.setEchoChar((char) 0);
@@ -63,8 +64,11 @@ public class InsertForm extends javax.swing.JFrame {
         btnClose = new javax.swing.JButton();
         btnShow = new javax.swing.JButton();
         txtPassword = new javax.swing.JPasswordField();
+        txtService = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         jLabel1.setText("Username:");
 
@@ -98,35 +102,43 @@ public class InsertForm extends javax.swing.JFrame {
             }
         });
 
+        jLabel4.setText("Service:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(45, 45, 45)
+                .addGap(49, 49, 49)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel4))
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtService)
                     .addComponent(txtUsername)
-                    .addComponent(txtPassword))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(txtPassword)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addComponent(btnShow)
-                .addGap(52, 52, 52))
+                .addContainerGap(32, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(78, 78, 78)
+                .addGap(90, 90, 90)
                 .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(77, 77, 77))
+                .addGap(83, 83, 83))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(29, 29, 29)
+                .addContainerGap(37, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtService, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -139,11 +151,11 @@ public class InsertForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(43, 43, 43))
         );
 
         pack();
@@ -168,13 +180,21 @@ public class InsertForm extends javax.swing.JFrame {
 
     private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
         if (pe == null) {
+            String service = txtService.getText().trim();
             String username = txtUsername.getText().trim();
             String password = String.valueOf(txtPassword.getPassword());
             String description = txtDescription.getText().trim();
 
+            txtService.setBackground(Color.white);
             txtUsername.setBackground(Color.white);
             txtPassword.setBackground(Color.white);
             txtDescription.setBackground(Color.white);
+
+            if (service.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Service mustn't be empty.", "Service is too short", JOptionPane.ERROR_MESSAGE);
+                txtService.setBackground(Color.red);
+                return;
+            }
 
             if (username.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Username mustn't be empty.", "Username is too short", JOptionPane.ERROR_MESSAGE);
@@ -189,6 +209,7 @@ public class InsertForm extends javax.swing.JFrame {
             }
 
             PasswordEntry pe = new PasswordEntry();
+            pe.setService(service);
             pe.setUsername(username);
             pe.setPassword(password);
             pe.setUserId(u.getId());
@@ -197,25 +218,37 @@ public class InsertForm extends javax.swing.JFrame {
 
             if (success) {
                 JOptionPane.showMessageDialog(this, "Good job, you've saved an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                Controller.getInstance().getMf().refreshTable();
+                Controller.getInstance().getMf().refreshEntryList();
+                Controller.getInstance().getMf().refreshTable(Controller.getInstance().getMf().getEntryList());
+                Controller.getInstance().getMf().loadCombobox();
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
             }
         } else {
+
+            if (txtService.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Service mustn't be empty.", "Service is too short", JOptionPane.ERROR_MESSAGE);
+                txtService.setBackground(Color.red);
+                return;
+            }
+
             if (txtUsername.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Username mustn't be empty.", "Username is too short", JOptionPane.ERROR_MESSAGE);
                 txtUsername.setBackground(Color.red);
                 return;
             }
 
+            pe.setService(txtService.getText());
             pe.setUsername(txtUsername.getText());
             pe.setDescription(txtDescription.getText());
             boolean updated = Controller.getInstance().updateEntry(pe, u);
 
             if (updated) {
                 JOptionPane.showMessageDialog(this, "Good job, you've updated an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                Controller.getInstance().getMf().refreshTable();
+                Controller.getInstance().getMf().refreshEntryList();
+                Controller.getInstance().getMf().refreshTable(Controller.getInstance().getMf().getEntryList());
+                Controller.getInstance().getMf().loadCombobox();
                 this.dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
@@ -265,9 +298,11 @@ public class InsertForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea txtDescription;
     private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JTextField txtService;
     private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables
 }

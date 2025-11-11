@@ -15,10 +15,11 @@ import java.util.List;
  * @author Omnix
  */
 public class Controller {
+
     private static Controller instance;
     private DBBroker dbb;
     private MainForm mf;
-    
+
     public static Controller getInstance() {
         if (instance == null) {
             instance = new Controller();
@@ -61,8 +62,6 @@ public class Controller {
     public boolean updateEntry(PasswordEntry pe, User u) {
         return dbb.updateEntry(pe, u);
     }
-    
-    
-    
-    
+
+
 }

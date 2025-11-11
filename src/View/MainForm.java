@@ -8,6 +8,7 @@ import Model.EntryTableModel;
 import Model.PasswordEntry;
 import Model.User;
 import Singletons.Controller;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 
@@ -19,6 +20,7 @@ public class MainForm extends javax.swing.JFrame {
 
     private User u;
     private List<PasswordEntry> entryList;
+    private List<PasswordEntry> filteredList;
 
     /**
      * Creates new form MainForm
@@ -31,7 +33,9 @@ public class MainForm extends javax.swing.JFrame {
         Controller.getInstance().setMf(this);
         this.u = u;
         initComponents();
-        refreshTable();
+        refreshEntryList();
+        loadCombobox();
+        refreshTable(entryList);
         setTitle("Welcome " + u.getUsername() + "!");
     }
 
@@ -49,6 +53,9 @@ public class MainForm extends javax.swing.JFrame {
         btnInsert = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnDetails = new javax.swing.JButton();
+        cmbServices = new javax.swing.JComboBox<>();
+        btnFilter = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -79,10 +86,25 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        btnDetails.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         btnDetails.setText("Details");
         btnDetails.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDetailsActionPerformed(evt);
+            }
+        });
+
+        btnFilter.setText("Filter");
+        btnFilter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFilterActionPerformed(evt);
+            }
+        });
+
+        btnReset.setText("Reset");
+        btnReset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnResetActionPerformed(evt);
             }
         });
 
@@ -92,27 +114,39 @@ public class MainForm extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(cmbServices, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnFilter, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnReset))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGap(21, 21, 21)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbServices, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnFilter)
+                    .addComponent(btnReset))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(132, 132, 132)
                         .addComponent(btnDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(16, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 381, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
@@ -138,7 +172,9 @@ public class MainForm extends javax.swing.JFrame {
 
         if (deleted) {
             JOptionPane.showMessageDialog(this, "You've successfully deleted an entry.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            refreshTable();
+            refreshEntryList();
+            refreshTable(entryList);
+            Controller.getInstance().getMf().loadCombobox();
         } else {
             JOptionPane.showMessageDialog(this, "There was an error while communicating with the database.", "Failure", JOptionPane.ERROR_MESSAGE);
         }
@@ -158,6 +194,23 @@ public class MainForm extends javax.swing.JFrame {
         InsertForm insf = new InsertForm(u, pe);
         insf.setVisible(true);
     }//GEN-LAST:event_btnDetailsActionPerformed
+
+    private void btnFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilterActionPerformed
+        filteredList = new ArrayList<>();
+        String filter = (String) cmbServices.getSelectedItem();
+
+        for (PasswordEntry pe : entryList) {
+            if (pe.getService().trim().toLowerCase().equals(filter.toLowerCase())) {
+                filteredList.add(pe);
+            }
+        }
+
+        refreshTable(filteredList);
+    }//GEN-LAST:event_btnFilterActionPerformed
+
+    private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed
+        refreshTable(entryList);
+    }//GEN-LAST:event_btnResetActionPerformed
 
     /**
      * @param args the command line arguments
@@ -197,14 +250,41 @@ public class MainForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnDetails;
+    private javax.swing.JButton btnFilter;
     private javax.swing.JButton btnInsert;
+    private javax.swing.JButton btnReset;
+    private javax.swing.JComboBox<String> cmbServices;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblEntries;
     // End of variables declaration//GEN-END:variables
 
-    void refreshTable() {
-        entryList = Controller.getInstance().selectEntries(u);
-        EntryTableModel etm = new EntryTableModel(entryList);
+    public void refreshTable(List<PasswordEntry> list) {
+        EntryTableModel etm = new EntryTableModel(list);
         tblEntries.setModel(etm);
     }
+
+    public void refreshEntryList() {
+        entryList = Controller.getInstance().selectEntries(u);
+    }
+
+    public List<PasswordEntry> getEntryList() {
+        return entryList;
+    }
+
+    public void loadCombobox() {
+        cmbServices.removeAllItems();
+        List<String> services = new ArrayList<>();
+        
+        for (PasswordEntry pe : entryList){
+            if (!services.contains(pe.getService().trim().toLowerCase())){
+                services.add(pe.getService().trim().toLowerCase());
+            }
+        }
+        
+        for (String service : services){
+            cmbServices.addItem(service.toUpperCase());
+        }
+    }
+    
+    
 }

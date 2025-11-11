@@ -15,7 +15,7 @@ import javax.swing.table.AbstractTableModel;
 public class EntryTableModel extends AbstractTableModel {
 
     private List<PasswordEntry> entryList = new ArrayList<>();
-    private String[] columns = {"Username", "Password"};
+    private String[] columns = {"Service", "Username", "Password"};
     
     public EntryTableModel(){
         
@@ -41,8 +41,10 @@ public class EntryTableModel extends AbstractTableModel {
 
         switch (columnIndex) {
             case 0:
-                return entry.getUsername();
+                return entry.getService();
             case 1:
+                return entry.getUsername();
+            case 2:
                 String starredPassword = "*".repeat(entry.getPassword().length());
                 return starredPassword;
             default:

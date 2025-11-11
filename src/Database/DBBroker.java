@@ -113,6 +113,7 @@ public class DBBroker {
 
                 entry.setId(rs.getInt("id"));
                 entry.setUserId(u.getId());
+                entry.setService(rs.getString("service"));
                 entry.setUsername(rs.getString("username"));
                 entry.setDescription(rs.getString("description"));
                 entry.setPassword(decryptedPW);
@@ -129,7 +130,7 @@ public class DBBroker {
 
     public boolean insertEntry(PasswordEntry pe, User u) {
         try {
-            String sql = "INSERT INTO password_entries (user_id, username, password, description) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO password_entries (user_id, service, username, password, description) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
 
             byte[] salt = Base64.getDecoder().decode(u.getSalt());
@@ -137,9 +138,10 @@ public class DBBroker {
             String encryptedPassword = CryptoUtils.encrypt(pe.getPassword(), key);
 
             ps.setInt(1, pe.getUserId());
-            ps.setString(2, pe.getUsername());
-            ps.setString(3, encryptedPassword);
-            ps.setString(4, pe.getDescription());
+            ps.setString(2, pe.getService());
+            ps.setString(3, pe.getUsername());
+            ps.setString(4, encryptedPassword);
+            ps.setString(5, pe.getDescription());
 
             int insertedRows = ps.executeUpdate();
             return insertedRows > 0;
@@ -168,12 +170,13 @@ public class DBBroker {
 
     public boolean updateEntry(PasswordEntry pe, User u) {
         try {
-            String sql = "UPDATE password_entries SET username = ?, description = ? WHERE id = ? AND user_id = ?";
+            String sql = "UPDATE password_entries SET service = ?, username = ?, description = ? WHERE id = ? AND user_id = ?";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ps.setString(1, pe.getUsername());
-            ps.setString(2, pe.getDescription());
-            ps.setInt(3, pe.getId());
-            ps.setInt(4, u.getId());
+            ps.setString(1, pe.getService());
+            ps.setString(2, pe.getUsername());
+            ps.setString(3, pe.getDescription());
+            ps.setInt(4, pe.getId());
+            ps.setInt(5, u.getId());
             int updatedRows = ps.executeUpdate();
             return updatedRows > 0;
         } catch (SQLException ex) {
