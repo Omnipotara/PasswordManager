@@ -9,8 +9,10 @@ package Model;
  * @author Omnix
  */
 public class PasswordEntry {
+
     private int id;
     private int userId;
+    private String service;
     private String username;
     private String password;
     private String description;
@@ -18,9 +20,10 @@ public class PasswordEntry {
     public PasswordEntry() {
     }
 
-    public PasswordEntry(int id, int userId, String username, String password, String description) {
+    public PasswordEntry(int id, int userId, String service, String username, String password, String description) {
         this.id = id;
         this.userId = userId;
+        this.service = service;
         this.username = username;
         this.password = password;
         this.description = description;
@@ -40,6 +43,14 @@ public class PasswordEntry {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     public String getUsername() {
@@ -65,7 +76,5 @@ public class PasswordEntry {
     public void setDescription(String description) {
         this.description = description;
     }
-    
-    
-    
+
 }
