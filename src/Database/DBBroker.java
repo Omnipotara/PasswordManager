@@ -4,8 +4,10 @@
  */
 package Database;
 
+import Cryptography.AlgorithmName;
 import Cryptography.CryptoUtils;
-import Cryptography.HashUtils;
+import Cryptography.Factory.HashingStrategyFactory;
+import Cryptography.Hashing.HashingStrategy;
 import Model.PasswordEntry;
 import Model.User;
 import java.security.SecureRandom;
@@ -38,10 +40,12 @@ public class DBBroker {
     }
 
     public int insertUser(User u) {
-        String passwordHashed = HashUtils.hashPassword(u.getPassword());
+        AlgorithmName hashingAlgorithm = u.getHashingAlgorithm();
+        HashingStrategy hashingStrategy = HashingStrategyFactory.getStrategy(hashingAlgorithm);
+        String passwordHashed = hashingStrategy.hash(u.getPassword());
 
         try {
-            String sql = "INSERT INTO users (username, password, salt) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO users (username, password, salt, hashing_algorithm) VALUES (?, ?, ?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
 
             byte[] salt = new byte[16];
@@ -51,6 +55,7 @@ public class DBBroker {
             ps.setString(1, u.getUsername());
             ps.setString(2, passwordHashed);
             ps.setString(3, saltBase64);
+            ps.setString(4, hashingAlgorithm.getDatabaseValue());
 
             int rows = ps.executeUpdate();
             return rows > 0 ? 1 : 0;
@@ -71,8 +76,10 @@ public class DBBroker {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 String password_db = rs.getString("password");
+                String hashingAlgorithm_db = rs.getString("hashing_algorithm");
+                HashingStrategy hashingStrategy = HashingStrategyFactory.getStrategy(hashingAlgorithm_db);
 
-                if (HashUtils.checkPassword(password, password_db)) {
+                if (hashingStrategy.verify(password, password_db)) {
                     int userID_db = rs.getInt("id");
                     String salt_db = rs.getString("salt");
 
@@ -80,6 +87,7 @@ public class DBBroker {
                     u.setUsername(username);
                     u.setPassword(password);
                     u.setSalt(salt_db);
+                    u.setHashingAlgorithm(hashingStrategy.getAlgorithmName());
 
                 } else {
                     u.setId(-1);

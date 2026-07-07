@@ -1,5 +1,7 @@
 package Cryptography;
 
+import Cryptography.Exceptions.UnsupportedAlgorithmException;
+
 /**
  * Centralized algorithm identifiers persisted in the database and reused by UI,
  * strategy factories, benchmarks, and documentation.

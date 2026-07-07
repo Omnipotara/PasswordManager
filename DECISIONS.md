@@ -58,6 +58,28 @@ Projekat treba da bude prenosiviji i manje vezan za lokalne apsolutne putanje. O
 Posledice:
 NetBeans/Ant classpath treba prebaciti da koristi JAR fajlove iz `lib/`. U `lib/` ne treba stavljati osetljive konfiguracione fajlove, već samo biblioteke potrebne za rad projekta.
 
+Azurirano 2026-07-07:
+U `lib/` su dodate proverene biblioteke koje pomazu da se algoritmi koriste preko gotovih implementacija, jer cilj diplomskog rada nije implementacija kriptografije od nule, vec poredjenje algoritama i prikaz rada password manager-a:
+
+- `bcprov-jdk18on-1.84.jar` - Bouncy Castle provider za Argon2id, ChaCha20-Poly1305 i dodatnu kripto podrsku.
+- `password4j-1.8.4.jar` - biblioteka za password hashing algoritme, korisna za poredjenje i potencijalno krace strategije.
+- `jakarta.mail-2.0.5.jar` - Jakarta Mail implementacija za SMTP slanje OTP kodova.
+- `angus-activation-2.0.3.jar` - Activation podrska potrebna za Jakarta Mail.
+- `mysql-connector-j-9.7.0.jar` - lokalni MySQL JDBC connector umesto apsolutne putanje van projekta.
+
+SHA-256 preuzetih JAR fajlova:
+
+```text
+angus-activation-2.0.3.jar A6BD35C538CF90FFF941AD6258C40C08FCA0B5C9C3F536C657114F27CE0527A7
+bcprov-jdk18on-1.84.jar 64D6C5A6121FCD927152DD182CBED39AFE0FDA641A970D9BCC0C9CB1858B2731
+jakarta.mail-2.0.5.jar F48001755A4A591BB1B602965337FCF316D794C43783052F88EDE05130539358
+mysql-connector-j-9.7.0.jar 0353648EAA1C91E0F4020C959ABF756BC866FFD583DF22AE6B6F6E0CBD43EB44
+password4j-1.8.4.jar D1406A158533B65BDA7C20CEBF7BF2A9A0626F8931FD1DC3D39243AF5849EDF5
+```
+
+Uticaj na vec uradjene strategije:
+Dodavanje ovih biblioteka ne menja automatski `BCryptStrategy` i `PBKDF2HashingStrategy`. `BCryptStrategy` ostaje na postojecem jBCrypt kodu zbog kompatibilnosti sa starim hash zapisima. `PBKDF2HashingStrategy` za sada ostaje na JDK `SecretKeyFactory` implementaciji, jer vec ima eksplicitan format zapisa koji cuva algoritam, iteracije, duzinu kljuca, salt i hash. Password4j ostaje dostupna biblioteka za benchmark, poredjenje i moguce kasnije pojednostavljenje strategija ako se pokaze korisnim.
+
 ---
 
 ## 2026-07-06 - Za Argon2id se koristi Bouncy Castle
@@ -124,6 +146,127 @@ BCrypt, PBKDF2 i Argon2id postaju odvojene hashing strategije. AES-GCM, AES-CBC-
 
 ---
 
+## 2026-07-07 - `HashingStrategy` definiše zajednički ugovor za master lozinku
+
+Kontekst:
+Faza 3 uvodi Strategy Pattern za zaštitu master lozinke. Potreban je zajednički interfejs koji će koristiti BCrypt, PBKDF2 i Argon2id implementacije.
+
+Odluka:
+Uvesti `Cryptography.Hashing.HashingStrategy` sa metodama:
+
+```java
+String hash(String password);
+boolean verify(String password, String storedHash);
+AlgorithmName getAlgorithmName();
+```
+
+Razlog:
+`String` se koristi za master lozinku da bi interfejs pratio postojeći stil projekta, jer modeli, forme i trenutna logika već rade sa lozinkama kao stringovima. Bezbednosno ograničenje je svesno prihvaćeno radi jednostavnije integracije u trenutnu aplikaciju. `AlgorithmName` povezuje strategiju sa centralizovanim nazivima algoritama koji se čuvaju u bazi.
+
+Posledice:
+BCrypt, PBKDF2 i Argon2id implementacije treba da implementiraju isti interfejs. Postojeći `HashUtils` se još ne menja u ovom koraku; on će biti povezan sa strategijom u narednom task-u.
+
+---
+
+## 2026-07-07 - BCrypt se izdvaja u `BCryptStrategy`
+
+Kontekst:
+Postojeća registracija i prijava korisnika koriste `HashUtils`, a `HashUtils` je direktno pozivao jBCrypt.
+
+Odluka:
+Uvesti `Cryptography.Hashing.BCryptStrategy` kao implementaciju `HashingStrategy`. `HashUtils` ostaje postojeći statički adapter, ali interno delegira na `BCryptStrategy`.
+
+Razlog:
+Ovim se dobija prva konkretna hashing strategija uz postepenu migraciju postojećeg toka aplikacije. Zadržava se isti jBCrypt format hash-a i cost faktor 10, pa postojeći BCrypt hash-evi ostaju proverljivi.
+
+Posledice:
+Naredne hashing strategije mogu da se dodaju paralelno. Kasnije će factory/resolver odlučivati koju strategiju koristiti na osnovu algoritma zapisanog uz korisnika.
+
+---
+
+## 2026-07-07 - PBKDF2 hashing strategija cuva parametre u hash zapisu
+
+Kontekst:
+Projekat vec koristi PBKDF2 u `CryptoUtils`, ali tamo PBKDF2 sluzi za derivaciju AES kljuca iz master lozinke i korisnickog salta. TASK 3.3 uvodi PBKDF2 kao alternativni algoritam za zastitu master lozinke pri prijavi.
+
+Odluka:
+Uvesti `Cryptography.Hashing.PBKDF2HashingStrategy` kao posebnu implementaciju `HashingStrategy`. Format zapisa je:
+
+```text
+PBKDF2$PBKDF2WithHmacSHA256$iterations$keyLengthBits$saltBase64$hashBase64
+```
+
+Razlog:
+Hash zapis mora da nosi sopstvene parametre da bi verifikacija radila i nakon buducih promena broja iteracija ili duzine kljuca. Strategija koristi poseban salt za password hash i ne deli odgovornost sa PBKDF2 derivacijom encryption kljuca.
+
+Posledice:
+PBKDF2 za login hash i PBKDF2 za AES key derivation ostaju odvojeni koncepti u kodu i dokumentaciji. `HashingStrategyFactory` ce kasnije moci da izabere ovu strategiju na osnovu `AlgorithmName.PBKDF2`.
+
+---
+
+## 2026-07-07 - Argon2id se implementira preko Bouncy Castle-a
+
+Kontekst:
+TASK 3.4 uvodi Argon2id kao trecu hashing strategiju za master lozinku. Argon2 je kompleksan password hashing algoritam i ne treba ga implementirati rucno u okviru diplomskog rada.
+
+Odluka:
+Uvesti `Cryptography.Hashing.Argon2idStrategy` kao implementaciju `HashingStrategy`, koristeci Bouncy Castle klase `Argon2BytesGenerator` i `Argon2Parameters`.
+
+Format zapisa je:
+
+```text
+ARGON2ID$version$memoryKb$iterations$parallelism$hashLengthBytes$saltBase64$hashBase64
+```
+
+Parametri inicijalne implementacije:
+
+- version: `Argon2Parameters.ARGON2_VERSION_13`
+- memory: `65536 KB`
+- iterations: `3`
+- parallelism: `1`
+- salt: `16 bytes`
+- hash: `32 bytes`
+
+Razlog:
+Bouncy Castle daje proverenu implementaciju Argon2id algoritma, dok aplikacija i dalje kontrolise format zapisa i parametre potrebne za kasniju verifikaciju. Cilj projekta je poredjenje algoritama i prikaz rada password manager-a, a ne implementacija kriptografskih primitiva od nule.
+
+Posledice:
+Argon2id hash zapis je samodovoljan za verifikaciju i moze se cuvati uz korisnika. Kasniji `HashingStrategyFactory` ce moci da bira ovu strategiju preko `AlgorithmName.ARGON2ID`.
+
+---
+
+## 2026-07-07 - Hashing strategije se biraju preko `HashingStrategyFactory`
+
+Kontekst:
+Nakon uvodjenja `BCryptStrategy`, `PBKDF2HashingStrategy` i `Argon2idStrategy`, poslovna logika ne treba da sadrzi `if/else` ili `switch` grananje za izbor konkretnog hashing algoritma.
+
+Odluka:
+Uvesti `Cryptography.Factory.HashingStrategyFactory` kao centralno mesto koje mapira `AlgorithmName` ili vrednost procitanu iz baze na konkretnu `HashingStrategy` implementaciju.
+
+Razlog:
+Factory izoluje izbor algoritma od registracije, login toka i baze. Kada se kasnije registruje korisnik sa izabranim hashing algoritmom, `DBBroker` ili servisni sloj treba samo da prosledi vrednost algoritma factory klasi.
+
+Posledice:
+Dodavanje nove hashing strategije kasnije zahteva promenu factory klase i `AlgorithmName`, a ne rasute izmene kroz UI i poslovnu logiku.
+
+---
+
+## 2026-07-07 - Izbor hashing algoritma cuva se uz korisnika
+
+Kontekst:
+TASK 3.6 povezuje hashing strategije sa registracijom i login tokom. Do sada su svi korisnici implicitno koristili BCrypt preko `HashUtils`.
+
+Odluka:
+Prosiriti `User` model i tabelu `users` poljem `hashing_algorithm`. Registraciona forma dobija izbor `BCRYPT`, `PBKDF2` ili `ARGON2ID`. `DBBroker` pri registraciji bira strategiju preko `HashingStrategyFactory`, a pri login-u cita algoritam iz baze i koristi odgovarajucu strategiju za proveru master lozinke.
+
+Razlog:
+Algoritam mora da bude sacuvan uz korisnika da bi stari i novi korisnici mogli da koegzistiraju cak i kada se za nove naloge izabere drugi hashing algoritam.
+
+Posledice:
+`users.password` u SQL dump-u se menja iz `varchar(100)` u `text`, jer PBKDF2 i Argon2id zapisi cuvaju vise parametara i mogu biti duzi od BCrypt hash-a. Postojeci demo korisnici dobijaju `hashing_algorithm = 'BCRYPT'`. Za vec postojecu lokalnu bazu dodat je migration SQL fajl koji dodaje novu kolonu i oznacava postojece korisnike kao `BCRYPT`.
+
+---
+
 ## 2026-07-06 - Nazivi algoritama su centralizovani u `AlgorithmName`
 
 Kontekst:
@@ -153,7 +296,7 @@ Kontekst:
 Factory/resolver klase i kriptografske strategije moraju jasno razlikovati nepoznat algoritam od neuspele kriptografske operacije, kao što su pogrešan ključ, oštećen ciphertext ili neuspešna verifikacija.
 
 Odluka:
-Uvesti osnovni `CryptoException`, zatim `UnsupportedAlgorithmException` za nepoznate vrednosti algoritma i `CryptoOperationException` za neuspele kriptografske operacije nakon što je algoritam već izabran.
+Uvesti poseban paket `Cryptography.Exceptions` sa osnovnim `CryptoException`, zatim `UnsupportedAlgorithmException` za nepoznate vrednosti algoritma i `CryptoOperationException` za neuspele kriptografske operacije nakon što je algoritam već izabran.
 
 Razlog:
 Domenski izuzeci čine kod čitljivijim i olakšavaju kasnije rukovanje greškama u servisnom sloju i UI-ju. Takođe pomažu testiranju, jer testovi mogu proveriti tačan tip greške.
@@ -355,8 +498,10 @@ src/
 
     Cryptography/
         AlgorithmName.java
-        CryptoException.java
-        UnsupportedAlgorithmException.java
+        Exceptions/
+            CryptoException.java
+            UnsupportedAlgorithmException.java
+            CryptoOperationException.java
 
         Hashing/
             HashingStrategy.java

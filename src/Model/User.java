@@ -4,6 +4,8 @@
  */
 package Model;
 
+import Cryptography.AlgorithmName;
+
 /**
  *
  * @author Omnix
@@ -13,6 +15,7 @@ public class User {
     private String username;
     private String password;
     private String salt;
+    private AlgorithmName hashingAlgorithm = AlgorithmName.BCRYPT;
 
     public User() {
     }
@@ -25,6 +28,12 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public User(String username, String password, AlgorithmName hashingAlgorithm) {
+        this.username = username;
+        this.password = password;
+        this.hashingAlgorithm = hashingAlgorithm;
     }
 
     public User(int id, String username, String password, String salt) {
@@ -65,8 +74,12 @@ public class User {
     public void setSalt(String salt) {
         this.salt = salt;
     }
-    
-    
-    
-    
+
+    public AlgorithmName getHashingAlgorithm() {
+        return hashingAlgorithm;
+    }
+
+    public void setHashingAlgorithm(AlgorithmName hashingAlgorithm) {
+        this.hashingAlgorithm = hashingAlgorithm;
+    }
 }

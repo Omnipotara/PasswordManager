@@ -206,13 +206,31 @@ Opis:
 Dodati su jasni izuzeci za slučaj da baza sadrži nepoznat algoritam ili da kriptografska operacija ne uspe.
 
 Fajlovi:
-- `src/Cryptography/CryptoException.java`
-- `src/Cryptography/UnsupportedAlgorithmException.java`
-- `src/Cryptography/CryptoOperationException.java`
+- `src/Cryptography/Exceptions/CryptoException.java`
+- `src/Cryptography/Exceptions/UnsupportedAlgorithmException.java`
+- `src/Cryptography/Exceptions/CryptoOperationException.java`
 - `src/Cryptography/AlgorithmName.java`
 
 Kriterijum završetka:
 Factory/resolver i servisni sloj mogu jasno da razlikuju nepodržan algoritam od neuspele kriptografske operacije. `AlgorithmName.fromDatabaseValue(...)` baca `UnsupportedAlgorithmException` za nepoznate vrednosti.
+
+### TASK 2.4 - Uvesti lokalne JAR biblioteke u `lib/`
+
+Status: DONE
+
+Opis:
+Preuzete su biblioteke koje omogućavaju korišćenje proverenih implementacija umesto ručne implementacije kriptografskih algoritama od nule.
+
+Fajlovi:
+- `lib/bcprov-jdk18on-1.84.jar`
+- `lib/password4j-1.8.4.jar`
+- `lib/jakarta.mail-2.0.5.jar`
+- `lib/angus-activation-2.0.3.jar`
+- `lib/mysql-connector-j-9.7.0.jar`
+- `nbproject/project.properties`
+
+Kriterijum završetka:
+NetBeans/Ant classpath koristi lokalne JAR fajlove iz `lib/`, a projekat više ne zavisi od apsolutne putanje za MySQL connector.
 
 ---
 
@@ -220,88 +238,89 @@ Factory/resolver i servisni sloj mogu jasno da razlikuju nepodržan algoritam od
 
 ### TASK 3.1 - Uvesti `HashingStrategy` interfejs
 
-Status: TODO
+Status: DONE
 
 Opis:
-Napraviti zajednički interfejs za algoritme koji štite master lozinku korisnika.
+Napravljen je zajednički interfejs za algoritme koji štite master lozinku korisnika.
 
 Fajlovi:
-- Novi fajl: `src/Cryptography/Hashing/HashingStrategy.java`
+- `src/Cryptography/Hashing/HashingStrategy.java`
 
 Kriterijum završetka:
-Interfejs definiše metode za hash, verify i naziv algoritma, uz tipove koji ne forsiraju čuvanje plain text lozinke duže nego što je potrebno.
+Interfejs definiše metode za hash, verify i naziv algoritma. Master lozinka se prima kao `String`, u skladu sa postojećim modelima i formama, a naziv algoritma se vraća kao `AlgorithmName`.
 
 ### TASK 3.2 - Prebaciti postojeći BCrypt kod u `BCryptStrategy`
 
-Status: TODO
+Status: DONE
 
 Opis:
-Postojeći `HashUtils` trenutno direktno koristi BCrypt. Logiku treba preseliti ili obmotati kroz `BCryptStrategy`, uz očuvanje kompatibilnosti sa postojećim korisnicima u bazi.
+Postojeći `HashUtils` je direktno koristio BCrypt. Logika je prebačena u `BCryptStrategy`, dok `HashUtils` ostaje kompatibilni adapter za eventualne stare pozive.
 
 Fajlovi:
 - `src/Cryptography/HashUtils.java`
-- Novi fajl: `src/Cryptography/Hashing/BCryptStrategy.java`
-- `src/Database/DBBroker.java`
+- `src/Cryptography/Hashing/BCryptStrategy.java`
 
 Kriterijum završetka:
-BCrypt hash i verify rade preko `HashingStrategy`, a postojeći BCrypt hash-evi ostaju validni.
+BCrypt hash i verify rade preko `HashingStrategy`, a postojeći BCrypt hash-evi ostaju validni jer se koristi isti jBCrypt format i isti cost faktor 10.
 
 ### TASK 3.3 - Implementirati `PBKDF2HashingStrategy`
 
-Status: TODO
+Status: DONE
 
 Opis:
-Dodati PBKDF2 strategiju za zaštitu master lozinke. Ovu strategiju razlikovati od postojeće PBKDF2 derivacije encryption ključa.
+Dodati PBKDF2 strategiju za zaštitu master lozinke. Strategija je odvojena od postojeće PBKDF2 derivacije encryption ključa u `CryptoUtils`.
 
 Fajlovi:
-- Novi fajl: `src/Cryptography/Hashing/PBKDF2HashingStrategy.java`
+- `src/Cryptography/Hashing/PBKDF2HashingStrategy.java`
 
 Kriterijum završetka:
-Strategija generiše salt, čuva parametre i verifikuje lozinku koristeći isti format zapisa.
+Strategija generiše salt, čuva parametre u formatu zapisa i verifikuje lozinku preko istog formata.
 
 ### TASK 3.4 - Implementirati `Argon2idStrategy`
 
-Status: TODO
+Status: DONE
 
 Opis:
-Dodati Argon2id strategiju pomoću proverene biblioteke. Ne implementirati Argon2 ručno.
+Dodati Argon2id strategiju pomoću proverene Bouncy Castle biblioteke. Argon2 se ne implementira ručno.
 
 Fajlovi:
-- Novi fajl: `src/Cryptography/Hashing/Argon2idStrategy.java`
+- `src/Cryptography/Hashing/Argon2idStrategy.java`
 - Bouncy Castle JAR u `lib/`
 - NetBeans/Ant classpath
 
 Kriterijum završetka:
-Argon2id hash i verify rade sa dokumentovanim parametrima, a biblioteka je jasno zabeležena u `DECISIONS.md`.
+Argon2id hash i verify rade sa dokumentovanim parametrima, a Bouncy Castle biblioteka je zabeležena u `DECISIONS.md`.
 
 ### TASK 3.5 - Uvesti `HashingStrategyFactory`
 
-Status: TODO
+Status: DONE
 
 Opis:
 Dodati resolver koji na osnovu naziva algoritma vraća odgovarajuću hashing strategiju.
 
 Fajlovi:
-- Novi fajl: `src/Cryptography/Factory/HashingStrategyFactory.java`
+- `src/Cryptography/Factory/HashingStrategyFactory.java`
 
 Kriterijum završetka:
-Business logika nema `if/else` grananje za svaki hashing algoritam.
+Business logika može da dobije hashing strategiju preko factory klase, bez ručnog `if/else` grananja za svaki hashing algoritam.
 
 ### TASK 3.6 - Dodati izbor hashing algoritma pri registraciji
 
-Status: TODO
+Status: DONE
 
 Opis:
-Registration forma treba da omogući izbor hashing algoritma za novog korisnika.
+Registration forma omogućava izbor hashing algoritma za novog korisnika.
 
 Fajlovi:
 - `src/View/RegistrationForm.java`
 - `src/View/RegistrationForm.form`
 - `src/Database/DBBroker.java`
 - `src/Model/User.java`
+- `passwordmanager_db.sql`
+- `migrations/2026-07-07_add_hashing_algorithm_to_users.sql`
 
 Kriterijum završetka:
-Novi korisnik se registruje sa izabranim algoritmom, a algoritam i parametri se čuvaju uz korisnika.
+Novi korisnik se registruje sa izabranim algoritmom, algoritam se čuva uz korisnika, a login koristi strategiju izabranu na osnovu vrednosti iz baze.
 
 ---
 

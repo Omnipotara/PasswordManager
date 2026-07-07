@@ -4,6 +4,7 @@
  */
 package View;
 
+import Cryptography.AlgorithmName;
 import Model.User;
 import Singletons.Controller;
 import java.awt.Color;
@@ -34,9 +35,11 @@ public class RegistrationForm extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
         txtPassword = new javax.swing.JPasswordField();
         txtPassword1 = new javax.swing.JPasswordField();
+        cmbHashingAlgorithm = new javax.swing.JComboBox<>();
         btnRegister = new javax.swing.JButton();
         btnShow = new javax.swing.JButton();
         btnLogin = new javax.swing.JButton();
@@ -49,11 +52,15 @@ public class RegistrationForm extends javax.swing.JFrame {
 
         jLabel3.setText("Repeat Password");
 
+        jLabel4.setText("Hashing Algorithm");
+
         txtUsername.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtUsernameActionPerformed(evt);
             }
         });
+
+        cmbHashingAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new AlgorithmName[] { AlgorithmName.BCRYPT, AlgorithmName.PBKDF2, AlgorithmName.ARGON2ID }));
 
         btnRegister.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         btnRegister.setText("Register");
@@ -87,12 +94,14 @@ public class RegistrationForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel3)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel4))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtUsername)
                     .addComponent(txtPassword)
-                    .addComponent(txtPassword1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE))
+                    .addComponent(txtPassword1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                    .addComponent(cmbHashingAlgorithm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnShow, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(24, Short.MAX_VALUE))
@@ -125,10 +134,14 @@ public class RegistrationForm extends javax.swing.JFrame {
                             .addComponent(txtPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(btnShow, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(cmbHashingAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
 
         pack();
@@ -178,7 +191,8 @@ public class RegistrationForm extends javax.swing.JFrame {
             return;
         }
 
-        User u = new User(username, password);
+        AlgorithmName hashingAlgorithm = (AlgorithmName) cmbHashingAlgorithm.getSelectedItem();
+        User u = new User(username, password, hashingAlgorithm);
         int result = Controller.getInstance().insertUser(u);
 
         switch (result) {
@@ -249,9 +263,11 @@ public class RegistrationForm extends javax.swing.JFrame {
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnRegister;
     private javax.swing.JButton btnShow;
+    private javax.swing.JComboBox<AlgorithmName> cmbHashingAlgorithm;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JPasswordField txtPassword1;
     private javax.swing.JTextField txtUsername;

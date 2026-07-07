@@ -29,12 +29,14 @@
                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="txtUsername" max="32767" attributes="0"/>
                   <Component id="txtPassword" max="32767" attributes="0"/>
                   <Component id="txtPassword1" alignment="0" pref="220" max="32767" attributes="0"/>
+                  <Component id="cmbHashingAlgorithm" pref="220" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="btnShow" min="-2" pref="59" max="-2" attributes="0"/>
@@ -79,10 +81,15 @@
                   <Component id="btnShow" pref="63" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmbHashingAlgorithm" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="btnRegister" min="-2" pref="70" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btnLogin" min="-2" pref="37" max="-2" attributes="0"/>
-              <EmptySpace pref="14" max="32767" attributes="0"/>
+              <EmptySpace pref="16" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -103,6 +110,11 @@
         <Property name="text" type="java.lang.String" value="Repeat Password"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Hashing Algorithm"/>
+      </Properties>
+    </Component>
     <Component class="javax.swing.JTextField" name="txtUsername">
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtUsernameActionPerformed"/>
@@ -111,6 +123,8 @@
     <Component class="javax.swing.JPasswordField" name="txtPassword">
     </Component>
     <Component class="javax.swing.JPasswordField" name="txtPassword1">
+    </Component>
+    <Component class="javax.swing.JComboBox" name="cmbHashingAlgorithm">
     </Component>
     <Component class="javax.swing.JButton" name="btnRegister">
       <Properties>
