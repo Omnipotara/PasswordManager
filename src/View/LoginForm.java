@@ -15,6 +15,8 @@ import javax.swing.JOptionPane;
  */
 public class LoginForm extends javax.swing.JFrame {
 
+    private static final String EMAIL_PATTERN = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
+
     /**
      * Creates new form RegistrationForm
      */
@@ -41,7 +43,7 @@ public class LoginForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Username");
+        jLabel1.setText("Email");
 
         jLabel2.setText("Password");
 
@@ -136,15 +138,20 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnShowActionPerformed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-        String username = txtUsername.getText().trim();
+        String email = txtUsername.getText().trim();
         String password = String.valueOf(txtPassword.getPassword());
         
-        if (username.isEmpty() || password.isEmpty()){
+        if (email.isEmpty() || password.isEmpty()){
             JOptionPane.showMessageDialog(this, "Enter both credentials!", "Entry error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        if (!isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this, "Enter a valid email address.", "Invalid email", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         
-        User u = Controller.getInstance().loginUser(username, password);
+        User u = Controller.getInstance().loginUser(email, password);
         
         if (u.getId() < 0){
             JOptionPane.showMessageDialog(this, "Wrong credentials.", "Login unsuccessful", JOptionPane.ERROR_MESSAGE);
@@ -167,6 +174,10 @@ public class LoginForm extends javax.swing.JFrame {
         rf.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches(EMAIL_PATTERN);
+    }
 
     /**
      * @param args the command line arguments

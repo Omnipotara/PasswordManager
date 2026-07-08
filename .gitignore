@@ -4,5 +4,8 @@
 /nbproject/private/
 /application.properties
 /benchmark-results/
+/DECISIONS.md
 /DNEVNIK_AKTIVNOSTI.md
+/RAZUMEVANJE_KRIPTO_ARHITEKTURE.md
+/TASKS.md
 *.class

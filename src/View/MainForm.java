@@ -36,7 +36,7 @@ public class MainForm extends javax.swing.JFrame {
         refreshEntryList();
         loadCombobox();
         refreshTable(entryList);
-        setTitle("Welcome " + u.getUsername() + "!");
+        setTitle("Welcome " + u.getEmail() + "!");
     }
 
     /**

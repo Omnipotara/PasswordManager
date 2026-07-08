@@ -16,6 +16,8 @@ import javax.swing.JOptionPane;
  */
 public class RegistrationForm extends javax.swing.JFrame {
 
+    private static final String EMAIL_PATTERN = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
+
     /**
      * Creates new form RegistrationForm
      */
@@ -46,7 +48,7 @@ public class RegistrationForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Username");
+        jLabel1.setText("Email");
 
         jLabel2.setText("Password");
 
@@ -163,13 +165,13 @@ public class RegistrationForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnShowActionPerformed
 
     private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegisterActionPerformed
-        String username = txtUsername.getText();
+        String email = txtUsername.getText().trim();
         txtUsername.setBackground(Color.white);
         txtPassword.setBackground(Color.white);
         txtPassword1.setBackground(Color.white);
 
-        if (username.length() < 4) {
-            JOptionPane.showMessageDialog(this, "Username must be atleast 4 characters long.", "Username is too short", JOptionPane.ERROR_MESSAGE);
+        if (!isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this, "Enter a valid email address.", "Invalid email", JOptionPane.ERROR_MESSAGE);
             txtUsername.setBackground(Color.red);
             return;
         }
@@ -192,12 +194,12 @@ public class RegistrationForm extends javax.swing.JFrame {
         }
 
         AlgorithmName hashingAlgorithm = (AlgorithmName) cmbHashingAlgorithm.getSelectedItem();
-        User u = new User(username, password, hashingAlgorithm);
+        User u = new User(email, password, hashingAlgorithm, false);
         int result = Controller.getInstance().insertUser(u);
 
         switch (result) {
             case -1:
-                JOptionPane.showMessageDialog(this, "That username is already taken.", "Username taken", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "That email is already registered.", "Email taken", JOptionPane.ERROR_MESSAGE);
                 txtUsername.setBackground(Color.red);
                 break;
             case 0:
@@ -223,6 +225,10 @@ public class RegistrationForm extends javax.swing.JFrame {
         lf.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnLoginActionPerformed
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches(EMAIL_PATTERN);
+    }
 
     /**
      * @param args the command line arguments

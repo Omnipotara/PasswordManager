@@ -48,19 +48,22 @@ DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) NOT NULL,
-  `password` text NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `password_hash` text NOT NULL,
   `salt` text NOT NULL,
   `hashing_algorithm` varchar(30) NOT NULL DEFAULT 'BCRYPT',
-  PRIMARY KEY (`id`,`username`)
+  `hashing_parameters` text DEFAULT NULL,
+  `mfa_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`username`,`password`,`salt`,`hashing_algorithm`) values 
-(3,'Omnix','$2a$10$uzzwLGzzfQ5urGSXwoF0UO3XsBvtLM.UJD2OP.LOVpo06uab1cSB.','vyWwjzd+3aq7C96I5Mg81g==','BCRYPT'),
-(4,'TestUser','$2a$10$ZF3EDVGlYiWU0H3P/HD8uuSijETWd3NreMW4XzUIAo78IqOfa.CqC','PPllYLi2D5XyTh8rZIX48A==','BCRYPT'),
-(5,'TestAccount','$2a$10$9wusFsUHtsYb9BPRHP1GMeIeLjt.As0jUdFpQRPDVknKrDKVNMwa.','7/yZL/fRUwSVbozv8lQ8Rw==','BCRYPT');
+insert  into `users`(`id`,`email`,`password_hash`,`salt`,`hashing_algorithm`,`hashing_parameters`,`mfa_enabled`) values 
+(3,'omnix@example.local','$2a$10$uzzwLGzzfQ5urGSXwoF0UO3XsBvtLM.UJD2OP.LOVpo06uab1cSB.','vyWwjzd+3aq7C96I5Mg81g==','BCRYPT',NULL,0),
+(4,'testuser@example.local','$2a$10$ZF3EDVGlYiWU0H3P/HD8uuSijETWd3NreMW4XzUIAo78IqOfa.CqC','PPllYLi2D5XyTh8rZIX48A==','BCRYPT',NULL,0),
+(5,'testaccount@example.local','$2a$10$9wusFsUHtsYb9BPRHP1GMeIeLjt.As0jUdFpQRPDVknKrDKVNMwa.','7/yZL/fRUwSVbozv8lQ8Rw==','BCRYPT',NULL,0);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

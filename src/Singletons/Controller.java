@@ -32,11 +32,11 @@ public class Controller {
     }
 
     public int insertUser(User u) {
-        return dbb.userExists(u.getUsername()) ? -1 : dbb.insertUser(u);
+        return dbb.userExists(u.getEmail()) ? -1 : dbb.insertUser(u);
     }
 
-    public User loginUser(String username, String password) {
-        return dbb.selectUser(username, password);
+    public User loginUser(String email, String password) {
+        return dbb.selectUser(email, password);
     }
 
     public List<PasswordEntry> selectEntries(User u) {

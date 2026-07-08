@@ -2,12 +2,13 @@ package Cryptography.Hashing;
 
 import Cryptography.AlgorithmName;
 import Cryptography.Exceptions.CryptoOperationException;
+import com.password4j.Hash;
+import com.password4j.PBKDF2Function;
+import com.password4j.types.Hmac;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import java.nio.charset.StandardCharsets;
 
 /**
  * PBKDF2 implementation used for protecting the user's master password.
@@ -64,16 +65,12 @@ public class PBKDF2HashingStrategy implements HashingStrategy {
     }
 
     private byte[] deriveHash(String password, byte[] salt, int iterations, int keyLengthBits) {
-        char[] passwordChars = password.toCharArray();
-
         try {
-            PBEKeySpec spec = new PBEKeySpec(passwordChars, salt, iterations, keyLengthBits);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
-            return factory.generateSecret(spec).getEncoded();
+            PBKDF2Function pbkdf2Function = PBKDF2Function.getInstance(Hmac.SHA256, iterations, keyLengthBits);
+            Hash hash = pbkdf2Function.hash(password.getBytes(StandardCharsets.UTF_8), salt);
+            return hash.getResultAsBytes();
         } catch (Exception ex) {
             throw new CryptoOperationException("PBKDF2 password hashing failed.", ex);
-        } finally {
-            Arrays.fill(passwordChars, '\0');
         }
     }
 

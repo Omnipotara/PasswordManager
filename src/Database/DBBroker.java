@@ -25,11 +25,11 @@ import javax.crypto.SecretKey;
  */
 public class DBBroker {
 
-    public boolean userExists(String username) {
+    public boolean userExists(String email) {
         try {
-            String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+            String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ps.setString(1, username);
+            ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1) > 0;
@@ -45,17 +45,19 @@ public class DBBroker {
         String passwordHashed = hashingStrategy.hash(u.getPassword());
 
         try {
-            String sql = "INSERT INTO users (username, password, salt, hashing_algorithm) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO users (email, password_hash, salt, hashing_algorithm, hashing_parameters, mfa_enabled) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
 
             byte[] salt = new byte[16];
             new SecureRandom().nextBytes(salt);
             String saltBase64 = Base64.getEncoder().encodeToString(salt);
 
-            ps.setString(1, u.getUsername());
+            ps.setString(1, u.getEmail());
             ps.setString(2, passwordHashed);
             ps.setString(3, saltBase64);
             ps.setString(4, hashingAlgorithm.getDatabaseValue());
+            ps.setString(5, u.getHashingParameters());
+            ps.setBoolean(6, u.isMfaEnabled());
 
             int rows = ps.executeUpdate();
             return rows > 0 ? 1 : 0;
@@ -65,17 +67,17 @@ public class DBBroker {
         }
     }
 
-    public User selectUser(String username, String password) {
+    public User selectUser(String email, String password) {
         User u = new User();
 
         try {
-            String sql = "SELECT * FROM users WHERE username = ?";
+            String sql = "SELECT * FROM users WHERE email = ?";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
-            ps.setString(1, username);
+            ps.setString(1, email);
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                String password_db = rs.getString("password");
+                String password_db = rs.getString("password_hash");
                 String hashingAlgorithm_db = rs.getString("hashing_algorithm");
                 HashingStrategy hashingStrategy = HashingStrategyFactory.getStrategy(hashingAlgorithm_db);
 
@@ -84,10 +86,13 @@ public class DBBroker {
                     String salt_db = rs.getString("salt");
 
                     u.setId(userID_db);
-                    u.setUsername(username);
+                    u.setEmail(email);
                     u.setPassword(password);
+                    u.setPasswordHash(password_db);
                     u.setSalt(salt_db);
                     u.setHashingAlgorithm(hashingStrategy.getAlgorithmName());
+                    u.setHashingParameters(rs.getString("hashing_parameters"));
+                    u.setMfaEnabled(rs.getBoolean("mfa_enabled"));
 
                 } else {
                     u.setId(-1);
@@ -145,7 +150,7 @@ public class DBBroker {
             SecretKey key = CryptoUtils.deriveKey(u.getPassword(), salt);
             String encryptedPassword = CryptoUtils.encrypt(pe.getPassword(), key);
 
-            ps.setInt(1, pe.getUserId());
+            ps.setInt(1, u.getId());
             ps.setString(2, pe.getService());
             ps.setString(3, pe.getUsername());
             ps.setString(4, encryptedPassword);

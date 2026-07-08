@@ -1,5 +1,6 @@
 package Cryptography;
 
+import Cryptography.KeyDerivation.KeyDerivationService;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import java.security.*;
@@ -7,11 +8,10 @@ import java.util.Base64;
 
 public class CryptoUtils {
 
+    private static final KeyDerivationService KEY_DERIVATION_SERVICE = new KeyDerivationService();
+
     public static SecretKey deriveKey(String masterPassword, byte[] salt) throws Exception {
-        PBEKeySpec spec = new PBEKeySpec(masterPassword.toCharArray(), salt, 200000, 256);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        byte[] keyBytes = factory.generateSecret(spec).getEncoded();
-        return new SecretKeySpec(keyBytes, "AES");
+        return KEY_DERIVATION_SERVICE.deriveEncryptionKey(masterPassword, salt);
     }
 
     public static String encrypt(String plaintext, SecretKey key) throws Exception {

@@ -11,34 +11,44 @@ import Cryptography.AlgorithmName;
  * @author Omnix
  */
 public class User {
-    private int id;
-    private String username;
-    private String password;
-    private String salt;
-    private AlgorithmName hashingAlgorithm = AlgorithmName.BCRYPT;
+    private int id; // Database user ID.
+    private String email; // Current login identifier.
+    private String password; // Current plain session password.
+    private String passwordHash; // Stored master password hash.
+    private String salt; // Encryption key derivation salt.
+    private AlgorithmName hashingAlgorithm = AlgorithmName.BCRYPT; // Master password hash algorithm.
+    private String hashingParameters; // Optional separated hash parameters.
+    private boolean mfaEnabled; // MFA enabled flag.
 
     public User() {
     }
-    
-    public User(int id, String username) {
+
+    public User(int id, String email) {
         this.id = id;
-        this.username = username;
+        this.email = email;
     }
-    
-    public User(String username, String password) {
-        this.username = username;
+
+    public User(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
-    public User(String username, String password, AlgorithmName hashingAlgorithm) {
-        this.username = username;
+    public User(String email, String password, AlgorithmName hashingAlgorithm) {
+        this.email = email;
         this.password = password;
         this.hashingAlgorithm = hashingAlgorithm;
     }
 
-    public User(int id, String username, String password, String salt) {
+    public User(String email, String password, AlgorithmName hashingAlgorithm, boolean mfaEnabled) {
+        this.email = email;
+        this.password = password;
+        this.hashingAlgorithm = hashingAlgorithm;
+        this.mfaEnabled = mfaEnabled;
+    }
+
+    public User(int id, String email, String password, String salt) {
         this.id = id;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.salt = salt;
     }
@@ -51,12 +61,12 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -65,6 +75,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getSalt() {
@@ -81,5 +99,21 @@ public class User {
 
     public void setHashingAlgorithm(AlgorithmName hashingAlgorithm) {
         this.hashingAlgorithm = hashingAlgorithm;
+    }
+
+    public String getHashingParameters() {
+        return hashingParameters;
+    }
+
+    public void setHashingParameters(String hashingParameters) {
+        this.hashingParameters = hashingParameters;
+    }
+
+    public boolean isMfaEnabled() {
+        return mfaEnabled;
+    }
+
+    public void setMfaEnabled(boolean mfaEnabled) {
+        this.mfaEnabled = mfaEnabled;
     }
 }
