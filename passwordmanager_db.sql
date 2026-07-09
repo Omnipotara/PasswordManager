@@ -25,22 +25,21 @@ CREATE TABLE `password_entries` (
   `user_id` bigint(20) NOT NULL,
   `service` varchar(50) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `password` varchar(100) NOT NULL,
+  `password` text NOT NULL,
+  `encryption_algorithm` varchar(30) NOT NULL DEFAULT 'AES_GCM',
+  `iv` text DEFAULT NULL,
+  `authentication_tag` text DEFAULT NULL,
+  `encryption_salt` text DEFAULT NULL,
+  `encryption_parameters` text DEFAULT NULL,
   `description` text,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `password_entries_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `password_entries` */
 
-insert  into `password_entries`(`id`,`user_id`,`service`,`username`,`password`,`description`) values 
-(3,4,'Facebook','MyAccount','FwHOmzh56bBroHPlpTuoNuBwX7RWcK7Qn9vceAMvv+Jv33px','This is my account. I love it and I want to keep it safe. I am a good person.'),
-(7,3,'Instagram','Omnix32','YWyEE129swknU9NU6bdtchTq0RHSgfgzwCMSAouzfmWp2xFtDEH9Nro=','This is my ultra safe account! With a changed DESCRIPTION!'),
-(9,3,'Facebook','Ognjen2003','jpSXgWRtAipQ8H5Lmp4MfUGVul5A41SO6azoctULWMU1gpTiEA==','This is my facebook account!'),
-(10,3,'instagram','test','kDnPs4aoVM8WQcvJlvMyRp5DBOjfqyGfIoJwoYl+8PS6ffk=','test123'),
-(11,3,'faCeboOk','ognjen','cq3EnIYnLjaEfULDzISrGGY27LoGzDv0FjZvEudXJZ1aeA==','aa'),
-(12,3,'World of Warcraft - Old Version','Gamer','Lc/CicjP9/K4uY2HRKIVqj8IZmEe7MDDTdLLhubotDl8AHK/','This is my WoW account. It is an older expansion.');
+/* password_entries demo data is intentionally empty because entries require encryption metadata. */
 
 /*Table structure for table `users` */
 

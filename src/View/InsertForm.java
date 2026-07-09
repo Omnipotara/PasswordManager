@@ -4,6 +4,7 @@
  */
 package View;
 
+import Cryptography.AlgorithmName;
 import Model.PasswordEntry;
 import Model.User;
 import Singletons.Controller;
@@ -41,6 +42,8 @@ public class InsertForm extends javax.swing.JFrame {
         txtPassword.setText(pe.getPassword());
         txtPassword.setEchoChar((char) 0);
         txtDescription.setText(pe.getDescription());
+        cmbEncryptionAlgorithm.setSelectedItem(pe.getEncryptionAlgorithm());
+        cmbEncryptionAlgorithm.setEnabled(false);
         btnShow.setVisible(false);
         btnInsert.setText("Update");
     }
@@ -66,6 +69,8 @@ public class InsertForm extends javax.swing.JFrame {
         txtPassword = new javax.swing.JPasswordField();
         txtService = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        cmbEncryptionAlgorithm = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -104,6 +109,10 @@ public class InsertForm extends javax.swing.JFrame {
 
         jLabel4.setText("Service:");
 
+        jLabel5.setText("Encryption:");
+
+        cmbEncryptionAlgorithm.setModel(new javax.swing.DefaultComboBoxModel<>(new AlgorithmName[] { AlgorithmName.AES_GCM, AlgorithmName.AES_CBC_HMAC, AlgorithmName.CHACHA20_POLY1305 }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -114,12 +123,14 @@ public class InsertForm extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(jLabel2)
                     .addComponent(jLabel1)
-                    .addComponent(jLabel4))
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtService)
                     .addComponent(txtUsername)
                     .addComponent(txtPassword)
+                    .addComponent(cmbEncryptionAlgorithm, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(btnShow)
@@ -152,10 +163,14 @@ public class InsertForm extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(cmbEncryptionAlgorithm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(43, 43, 43))
+                .addGap(21, 21, 21))
         );
 
         pack();
@@ -184,6 +199,7 @@ public class InsertForm extends javax.swing.JFrame {
             String username = txtUsername.getText().trim();
             String password = String.valueOf(txtPassword.getPassword());
             String description = txtDescription.getText().trim();
+            AlgorithmName encryptionAlgorithm = (AlgorithmName) cmbEncryptionAlgorithm.getSelectedItem();
 
             txtService.setBackground(Color.white);
             txtUsername.setBackground(Color.white);
@@ -214,6 +230,7 @@ public class InsertForm extends javax.swing.JFrame {
             pe.setPassword(password);
             pe.setUserId(u.getId());
             pe.setDescription(description);
+            pe.setEncryptionAlgorithm(encryptionAlgorithm);
             boolean success = Controller.getInstance().insertEntry(pe, u);
 
             if (success) {
@@ -295,10 +312,12 @@ public class InsertForm extends javax.swing.JFrame {
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnInsert;
     private javax.swing.JButton btnShow;
+    private javax.swing.JComboBox<AlgorithmName> cmbEncryptionAlgorithm;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea txtDescription;
     private javax.swing.JPasswordField txtPassword;

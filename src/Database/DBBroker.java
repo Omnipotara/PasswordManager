@@ -6,8 +6,12 @@ package Database;
 
 import Cryptography.AlgorithmName;
 import Cryptography.CryptoUtils;
+import Cryptography.Encryption.EncryptionStrategy;
+import Cryptography.Factory.EncryptionStrategyFactory;
 import Cryptography.Factory.HashingStrategyFactory;
 import Cryptography.Hashing.HashingStrategy;
+import Cryptography.KeyDerivation.KeyDerivationService;
+import Cryptography.Model.EncryptedData;
 import Model.PasswordEntry;
 import Model.User;
 import java.security.SecureRandom;
@@ -24,6 +28,9 @@ import javax.crypto.SecretKey;
  * @author Omnix
  */
 public class DBBroker {
+
+    private static final KeyDerivationService KEY_DERIVATION_SERVICE = new KeyDerivationService();
+    private static final int ENCRYPTION_SALT_LENGTH_BYTES = 16;
 
     public boolean userExists(String email) {
         try {
@@ -119,16 +126,26 @@ public class DBBroker {
             while (rs.next()) {
                 PasswordEntry entry = new PasswordEntry();
 
-                byte[] salt = Base64.getDecoder().decode(u.getSalt());
-                String encryptedPW = rs.getString("password");
-                SecretKey key = CryptoUtils.deriveKey(u.getPassword(), salt);
-                String decryptedPW = CryptoUtils.decrypt(encryptedPW, key);
-
                 entry.setId(rs.getInt("id"));
                 entry.setUserId(u.getId());
                 entry.setService(rs.getString("service"));
                 entry.setUsername(rs.getString("username"));
                 entry.setDescription(rs.getString("description"));
+                entry.setPassword(rs.getString("password"));
+                entry.setEncryptionAlgorithm(AlgorithmName.fromDatabaseValue(rs.getString("encryption_algorithm")));
+                entry.setIv(rs.getString("iv"));
+                entry.setAuthenticationTag(rs.getString("authentication_tag"));
+                entry.setEncryptionSalt(rs.getString("encryption_salt"));
+                entry.setEncryptionParameters(rs.getString("encryption_parameters"));
+
+                SecretKey key = deriveEntryKey(u, entry.getEncryptionSalt());
+                String decryptedPW;
+                if (entry.getIv() == null || entry.getIv().isEmpty() || entry.getAuthenticationTag() == null || entry.getAuthenticationTag().isEmpty()) {
+                    decryptedPW = CryptoUtils.decrypt(entry.getPassword(), key);
+                } else {
+                    EncryptionStrategy encryptionStrategy = EncryptionStrategyFactory.getStrategy(entry.getEncryptionAlgorithm());
+                    decryptedPW = encryptionStrategy.decrypt(entry.toEncryptedData(), key);
+                }
                 entry.setPassword(decryptedPW);
 
                 entryList.add(entry);
@@ -143,18 +160,29 @@ public class DBBroker {
 
     public boolean insertEntry(PasswordEntry pe, User u) {
         try {
-            String sql = "INSERT INTO password_entries (user_id, service, username, password, description) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO password_entries "
+                    + "(user_id, service, username, password, encryption_algorithm, iv, authentication_tag, encryption_salt, encryption_parameters, description) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
 
-            byte[] salt = Base64.getDecoder().decode(u.getSalt());
-            SecretKey key = CryptoUtils.deriveKey(u.getPassword(), salt);
-            String encryptedPassword = CryptoUtils.encrypt(pe.getPassword(), key);
+            AlgorithmName encryptionAlgorithm = pe.getEncryptionAlgorithm();
+            EncryptionStrategy encryptionStrategy = EncryptionStrategyFactory.getStrategy(encryptionAlgorithm);
+            String encryptionSalt = generateEncryptionSalt();
+            SecretKey key = deriveEntryKey(u, encryptionSalt);
+            EncryptedData encryptedData = encryptionStrategy.encrypt(pe.getPassword(), key);
+            encryptedData.setSaltBase64(encryptionSalt);
+            pe.applyEncryptedData(encryptedData);
 
             ps.setInt(1, u.getId());
             ps.setString(2, pe.getService());
             ps.setString(3, pe.getUsername());
-            ps.setString(4, encryptedPassword);
-            ps.setString(5, pe.getDescription());
+            ps.setString(4, pe.getPassword());
+            ps.setString(5, pe.getEncryptionAlgorithm().getDatabaseValue());
+            ps.setString(6, pe.getIv());
+            ps.setString(7, pe.getAuthenticationTag());
+            ps.setString(8, pe.getEncryptionSalt());
+            ps.setString(9, pe.getEncryptionParameters());
+            ps.setString(10, pe.getDescription());
 
             int insertedRows = ps.executeUpdate();
             return insertedRows > 0;
@@ -197,6 +225,20 @@ public class DBBroker {
         }
 
         return false;
+    }
+
+    private SecretKey deriveEntryKey(User user, String encryptionSalt) {
+        String saltBase64 = encryptionSalt != null && !encryptionSalt.isEmpty()
+                ? encryptionSalt
+                : user.getSalt();
+        byte[] salt = Base64.getDecoder().decode(saltBase64);
+        return KEY_DERIVATION_SERVICE.deriveEncryptionKey(user.getPassword(), salt);
+    }
+
+    private String generateEncryptionSalt() {
+        byte[] salt = new byte[ENCRYPTION_SALT_LENGTH_BYTES];
+        new SecureRandom().nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
     }
 
 }
