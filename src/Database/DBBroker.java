@@ -5,7 +5,7 @@
 package Database;
 
 import Cryptography.AlgorithmName;
-import Cryptography.CryptoUtils;
+import Cryptography.Encryption.AESGCMStrategy;
 import Cryptography.Encryption.EncryptionStrategy;
 import Cryptography.Factory.EncryptionStrategyFactory;
 import Cryptography.Factory.HashingStrategyFactory;
@@ -30,6 +30,7 @@ import javax.crypto.SecretKey;
 public class DBBroker {
 
     private static final KeyDerivationService KEY_DERIVATION_SERVICE = new KeyDerivationService();
+    private static final AESGCMStrategy LEGACY_AES_GCM_STRATEGY = new AESGCMStrategy();
     private static final int ENCRYPTION_SALT_LENGTH_BYTES = 16;
 
     public boolean userExists(String email) {
@@ -141,7 +142,7 @@ public class DBBroker {
                 SecretKey key = deriveEntryKey(u, entry.getEncryptionSalt());
                 String decryptedPW;
                 if (entry.getIv() == null || entry.getIv().isEmpty() || entry.getAuthenticationTag() == null || entry.getAuthenticationTag().isEmpty()) {
-                    decryptedPW = CryptoUtils.decrypt(entry.getPassword(), key);
+                    decryptedPW = decryptLegacyAesGcm(entry.getPassword(), key);
                 } else {
                     EncryptionStrategy encryptionStrategy = EncryptionStrategyFactory.getStrategy(entry.getEncryptionAlgorithm());
                     decryptedPW = encryptionStrategy.decrypt(entry.toEncryptedData(), key);
@@ -239,6 +240,11 @@ public class DBBroker {
         byte[] salt = new byte[ENCRYPTION_SALT_LENGTH_BYTES];
         new SecureRandom().nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);
+    }
+
+    private String decryptLegacyAesGcm(String legacyCiphertext, SecretKey key) {
+        EncryptedData encryptedData = LEGACY_AES_GCM_STRATEGY.fromLegacyCombinedBase64(legacyCiphertext);
+        return LEGACY_AES_GCM_STRATEGY.decrypt(encryptedData, key);
     }
 
 }
