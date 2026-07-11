@@ -17,7 +17,6 @@ public class User {
     private String passwordHash; // Stored master password hash.
     private String salt; // Encryption key derivation salt.
     private AlgorithmName hashingAlgorithm = AlgorithmName.BCRYPT; // Master password hash algorithm.
-    private String hashingParameters; // Optional separated hash parameters.
     private boolean mfaEnabled; // MFA enabled flag.
 
     public User() {
@@ -99,14 +98,6 @@ public class User {
 
     public void setHashingAlgorithm(AlgorithmName hashingAlgorithm) {
         this.hashingAlgorithm = hashingAlgorithm;
-    }
-
-    public String getHashingParameters() {
-        return hashingParameters;
-    }
-
-    public void setHashingParameters(String hashingParameters) {
-        this.hashingParameters = hashingParameters;
     }
 
     public boolean isMfaEnabled() {
