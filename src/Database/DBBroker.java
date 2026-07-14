@@ -53,7 +53,7 @@ public class DBBroker {
         String passwordHashed = hashingStrategy.hash(u.getPassword());
 
         try {
-            String sql = "INSERT INTO users (email, password_hash, salt, hashing_algorithm, mfa_enabled) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (email, password_hash, salt, hashing_algorithm) VALUES (?, ?, ?, ?)";
             PreparedStatement ps = DBConnection.getInstance().getConnection().prepareStatement(sql);
 
             byte[] salt = new byte[16];
@@ -64,7 +64,6 @@ public class DBBroker {
             ps.setString(2, passwordHashed);
             ps.setString(3, saltBase64);
             ps.setString(4, hashingAlgorithm.getDatabaseValue());
-            ps.setBoolean(5, u.isMfaEnabled());
 
             int rows = ps.executeUpdate();
             return rows > 0 ? 1 : 0;
@@ -98,7 +97,6 @@ public class DBBroker {
                     u.setPasswordHash(password_db);
                     u.setSalt(salt_db);
                     u.setHashingAlgorithm(hashingStrategy.getAlgorithmName());
-                    u.setMfaEnabled(rs.getBoolean("mfa_enabled"));
 
                 } else {
                     u.setId(-1);

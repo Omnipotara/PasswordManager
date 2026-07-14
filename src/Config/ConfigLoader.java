@@ -31,6 +31,12 @@ public class ConfigLoader {
         return new AppConfig(
                 properties.getProperty("db.url"),
                 properties.getProperty("db.username"),
-                properties.getProperty("db.password"));
+                properties.getProperty("db.password"),
+                properties.getProperty("smtp.host"),
+                properties.getProperty("smtp.port"),
+                properties.getProperty("smtp.username"),
+                properties.getProperty("smtp.password"),
+                properties.getProperty("smtp.auth"),
+                properties.getProperty("smtp.starttls"));
     }
 }

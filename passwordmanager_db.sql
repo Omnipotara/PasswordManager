@@ -51,17 +51,16 @@ CREATE TABLE `users` (
   `password_hash` text NOT NULL,
   `salt` text NOT NULL,
   `hashing_algorithm` varchar(30) NOT NULL DEFAULT 'BCRYPT',
-  `mfa_enabled` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 /*Data for the table `users` */
 
-insert  into `users`(`id`,`email`,`password_hash`,`salt`,`hashing_algorithm`,`mfa_enabled`) values 
-(3,'omnix@example.local','$2a$10$uzzwLGzzfQ5urGSXwoF0UO3XsBvtLM.UJD2OP.LOVpo06uab1cSB.','vyWwjzd+3aq7C96I5Mg81g==','BCRYPT',0),
-(4,'testuser@example.local','$2a$10$ZF3EDVGlYiWU0H3P/HD8uuSijETWd3NreMW4XzUIAo78IqOfa.CqC','PPllYLi2D5XyTh8rZIX48A==','BCRYPT',0),
-(5,'testaccount@example.local','$2a$10$9wusFsUHtsYb9BPRHP1GMeIeLjt.As0jUdFpQRPDVknKrDKVNMwa.','7/yZL/fRUwSVbozv8lQ8Rw==','BCRYPT',0);
+insert  into `users`(`id`,`email`,`password_hash`,`salt`,`hashing_algorithm`) values 
+(3,'omnix@example.local','$2a$10$uzzwLGzzfQ5urGSXwoF0UO3XsBvtLM.UJD2OP.LOVpo06uab1cSB.','vyWwjzd+3aq7C96I5Mg81g==','BCRYPT'),
+(4,'testuser@example.local','$2a$10$ZF3EDVGlYiWU0H3P/HD8uuSijETWd3NreMW4XzUIAo78IqOfa.CqC','PPllYLi2D5XyTh8rZIX48A==','BCRYPT'),
+(5,'testaccount@example.local','$2a$10$9wusFsUHtsYb9BPRHP1GMeIeLjt.As0jUdFpQRPDVknKrDKVNMwa.','7/yZL/fRUwSVbozv8lQ8Rw==','BCRYPT');
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

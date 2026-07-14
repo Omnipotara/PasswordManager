@@ -194,7 +194,7 @@ public class RegistrationForm extends javax.swing.JFrame {
         }
 
         AlgorithmName hashingAlgorithm = (AlgorithmName) cmbHashingAlgorithm.getSelectedItem();
-        User u = new User(email, password, hashingAlgorithm, false);
+        User u = new User(email, password, hashingAlgorithm);
         int result = Controller.getInstance().insertUser(u);
 
         switch (result) {

@@ -4,10 +4,16 @@
  */
 package View;
 
+import MFA.EmailService;
+import MFA.OtpCode;
+import MFA.OtpGenerationResult;
+import MFA.OtpService;
+import MFA.OtpVerificationResult;
 import Model.User;
 import Singletons.Controller;
 import java.awt.Color;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 
 /**
  *
@@ -16,12 +22,20 @@ import javax.swing.JOptionPane;
 public class LoginForm extends javax.swing.JFrame {
 
     private static final String EMAIL_PATTERN = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
+    private static final int OTP_TIMER_SECONDS = (int) OtpService.VALIDITY_DURATION.getSeconds();
+    private final OtpService otpService = new OtpService();
+    private final EmailService emailService = new EmailService();
+    private OtpCode currentOtp;
+    private User pendingMfaUser;
+    private Timer otpTimer;
+    private int otpSecondsRemaining;
 
     /**
      * Creates new form RegistrationForm
      */
     public LoginForm() {
         initComponents();
+        resetOtpState();
     }
 
     /**
@@ -35,17 +49,23 @@ public class LoginForm extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
         txtPassword = new javax.swing.JPasswordField();
+        txtOtp = new javax.swing.JTextField();
         btnLogin = new javax.swing.JButton();
         btnShow = new javax.swing.JButton();
         btnRegister = new javax.swing.JButton();
+        btnSendCode = new javax.swing.JButton();
+        lblOtpTimer = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setText("Email");
 
         jLabel2.setText("Password");
+
+        jLabel3.setText("OTP");
 
         txtUsername.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -76,6 +96,15 @@ public class LoginForm extends javax.swing.JFrame {
             }
         });
 
+        btnSendCode.setText("Send code");
+        btnSendCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSendCodeActionPerformed(evt);
+            }
+        });
+
+        lblOtpTimer.setText(" ");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -84,17 +113,22 @@ public class LoginForm extends javax.swing.JFrame {
                 .addGap(119, 119, 119)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel3))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtUsername, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
-                    .addComponent(txtPassword))
+                    .addComponent(txtPassword)
+                    .addComponent(txtOtp))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnShow, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnShow, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnSendCode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(24, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblOtpTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnRegister, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -114,6 +148,13 @@ public class LoginForm extends javax.swing.JFrame {
                         .addComponent(jLabel2)
                         .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnShow))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtOtp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSendCode))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblOtpTimer)
                 .addGap(18, 18, 18)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -138,30 +179,17 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btnShowActionPerformed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-        String email = txtUsername.getText().trim();
-        String password = String.valueOf(txtPassword.getPassword());
-        
-        if (email.isEmpty() || password.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Enter both credentials!", "Entry error", JOptionPane.ERROR_MESSAGE);
+        User u = authenticateCredentials();
+
+        if (u == null) {
             return;
         }
 
-        if (!isValidEmail(email)) {
-            JOptionPane.showMessageDialog(this, "Enter a valid email address.", "Invalid email", JOptionPane.ERROR_MESSAGE);
+        if (!verifyOtpBeforeLogin(u)) {
             return;
         }
-        
-        User u = Controller.getInstance().loginUser(email, password);
-        
-        if (u.getId() < 0){
-            JOptionPane.showMessageDialog(this, "Wrong credentials.", "Login unsuccessful", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
-        JOptionPane.showMessageDialog(this, "You've successully logged in.", "Login successful", JOptionPane.INFORMATION_MESSAGE);
-        MainForm mf = new MainForm(u);
-        mf.setVisible(true);
-        this.dispose();
+
+        completeLogin(u);
         
     }//GEN-LAST:event_btnLoginActionPerformed
 
@@ -174,6 +202,146 @@ public class LoginForm extends javax.swing.JFrame {
         rf.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnRegisterActionPerformed
+
+    private void btnSendCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendCodeActionPerformed
+        User u = authenticateCredentials();
+
+        if (u == null) {
+            return;
+        }
+
+        try {
+            OtpGenerationResult result = otpService.createOtp(u.getId(), currentOtp);
+            emailService.sendOtpCode(u.getEmail(), result.getPlainCode());
+            currentOtp = result.getOtpCode();
+            pendingMfaUser = u;
+            txtOtp.setText("");
+            txtOtp.setEnabled(true);
+            startOtpTimer();
+            JOptionPane.showMessageDialog(this, "Verification code sent to your email.", "OTP sent", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Unable to send verification code.", "Email problem", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnSendCodeActionPerformed
+
+    private User authenticateCredentials() {
+        String email = txtUsername.getText().trim();
+        String password = String.valueOf(txtPassword.getPassword());
+
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Enter both credentials!", "Entry error", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        if (!isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this, "Enter a valid email address.", "Invalid email", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        User u = Controller.getInstance().loginUser(email, password);
+
+        if (u.getId() < 0) {
+            JOptionPane.showMessageDialog(this, "Wrong credentials.", "Login unsuccessful", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        return u;
+    }
+
+    private boolean verifyOtpBeforeLogin(User user) {
+        String submittedCode = txtOtp.getText().trim();
+
+        if (currentOtp == null || pendingMfaUser == null || pendingMfaUser.getId() != user.getId()) {
+            JOptionPane.showMessageDialog(this, "Send a verification code first.", "OTP required", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        OtpVerificationResult result = otpService.verify(currentOtp, submittedCode);
+        if (result.isSuccessful()) {
+            stopOtpTimer();
+            return true;
+        }
+
+        showOtpFailure(result.getStatus());
+        updateOtpTimerLabel();
+        return false;
+    }
+
+    private void showOtpFailure(OtpVerificationResult.Status status) {
+        switch (status) {
+            case INVALID_INPUT:
+                JOptionPane.showMessageDialog(this, "Enter the 6-digit verification code.", "Invalid OTP", JOptionPane.ERROR_MESSAGE);
+                break;
+            case EXPIRED:
+                JOptionPane.showMessageDialog(this, "Verification code expired. Send a new code.", "OTP expired", JOptionPane.ERROR_MESSAGE);
+                break;
+            case TOO_MANY_ATTEMPTS:
+                JOptionPane.showMessageDialog(this, "Too many wrong attempts. Send a new code.", "OTP locked", JOptionPane.ERROR_MESSAGE);
+                break;
+            case CONSUMED:
+                JOptionPane.showMessageDialog(this, "Verification code was already used. Send a new code.", "OTP used", JOptionPane.ERROR_MESSAGE);
+                break;
+            case INVALID_CODE:
+            default:
+                JOptionPane.showMessageDialog(this, "Wrong verification code.", "Invalid OTP", JOptionPane.ERROR_MESSAGE);
+                break;
+        }
+    }
+
+    private void completeLogin(User user) {
+        JOptionPane.showMessageDialog(this, "You've successully logged in.", "Login successful", JOptionPane.INFORMATION_MESSAGE);
+        MainForm mf = new MainForm(user);
+        mf.setVisible(true);
+        this.dispose();
+    }
+
+    private void resetOtpState() {
+        currentOtp = null;
+        pendingMfaUser = null;
+        txtOtp.setText("");
+        txtOtp.setEnabled(true);
+        lblOtpTimer.setText(" ");
+    }
+
+    private void startOtpTimer() {
+        stopOtpTimer();
+        otpSecondsRemaining = OTP_TIMER_SECONDS;
+        updateOtpTimerLabel();
+        otpTimer = new Timer(1000, event -> {
+            otpSecondsRemaining--;
+            if (otpSecondsRemaining <= 0) {
+                stopOtpTimer();
+                if (currentOtp != null && !currentOtp.isConsumed()) {
+                    currentOtp.markConsumed();
+                }
+                lblOtpTimer.setText("Code expired.");
+            } else {
+                updateOtpTimerLabel();
+            }
+        });
+        otpTimer.start();
+    }
+
+    private void stopOtpTimer() {
+        if (otpTimer != null) {
+            otpTimer.stop();
+            otpTimer = null;
+        }
+    }
+
+    private void updateOtpTimerLabel() {
+        if (currentOtp == null) {
+            lblOtpTimer.setText(" ");
+            return;
+        }
+
+        if (currentOtp.isConsumed()) {
+            lblOtpTimer.setText("Code inactive.");
+            return;
+        }
+
+        lblOtpTimer.setText("Code expires in " + otpSecondsRemaining + "s.");
+    }
 
     private boolean isValidEmail(String email) {
         return email != null && email.matches(EMAIL_PATTERN);
@@ -218,9 +386,13 @@ public class LoginForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLogin;
     private javax.swing.JButton btnRegister;
+    private javax.swing.JButton btnSendCode;
     private javax.swing.JButton btnShow;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel lblOtpTimer;
+    private javax.swing.JTextField txtOtp;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUsername;
     // End of variables declaration//GEN-END:variables

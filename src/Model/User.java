@@ -17,7 +17,6 @@ public class User {
     private String passwordHash; // Stored master password hash.
     private String salt; // Encryption key derivation salt.
     private AlgorithmName hashingAlgorithm = AlgorithmName.BCRYPT; // Master password hash algorithm.
-    private boolean mfaEnabled; // MFA enabled flag.
 
     public User() {
     }
@@ -36,13 +35,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.hashingAlgorithm = hashingAlgorithm;
-    }
-
-    public User(String email, String password, AlgorithmName hashingAlgorithm, boolean mfaEnabled) {
-        this.email = email;
-        this.password = password;
-        this.hashingAlgorithm = hashingAlgorithm;
-        this.mfaEnabled = mfaEnabled;
     }
 
     public User(int id, String email, String password, String salt) {
@@ -100,11 +92,4 @@ public class User {
         this.hashingAlgorithm = hashingAlgorithm;
     }
 
-    public boolean isMfaEnabled() {
-        return mfaEnabled;
-    }
-
-    public void setMfaEnabled(boolean mfaEnabled) {
-        this.mfaEnabled = mfaEnabled;
-    }
 }
