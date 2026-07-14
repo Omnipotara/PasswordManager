@@ -4,6 +4,8 @@
  */
 package Database;
 
+import Config.AppConfig;
+import Config.ConfigLoader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -28,18 +30,12 @@ public class DBConnection {
 
     private DBConnection() {
         try {
-
-            String url = "jdbc:mysql://localhost:3306/passwordmanager_db"
-                    + "?useSSL=false"
-                    + "&allowPublicKeyRetrieval=true"
-                    + "&serverTimezone=UTC";
-
-            String user = "root";
-            String pass = "ognjen";
-
-            connection = DriverManager.getConnection(url, user, pass);
+            AppConfig config = ConfigLoader.load();
+            connection = DriverManager.getConnection(
+                    config.getDatabaseUrl(),
+                    config.getDatabaseUsername(),
+                    config.getDatabasePassword());
             connection.setAutoCommit(true);
-
         } catch (SQLException ex) {
             Logger.getLogger(DBConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
