@@ -12,4 +12,6 @@ public interface HashingStrategy {
     boolean verify(String password, String storedHash);
 
     AlgorithmName getAlgorithmName();
+
+    String getParametersDescription();
 }

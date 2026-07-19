@@ -24,4 +24,9 @@ public class BCryptStrategy implements HashingStrategy {
     public AlgorithmName getAlgorithmName() {
         return AlgorithmName.BCRYPT;
     }
+
+    @Override
+    public String getParametersDescription() {
+        return "cost=" + LOG_ROUNDS;
+    }
 }

@@ -55,6 +55,15 @@ public class Argon2idStrategy implements HashingStrategy {
         return AlgorithmName.ARGON2ID;
     }
 
+    @Override
+    public String getParametersDescription() {
+        return "variant=Argon2id;memoryKiB=" + MEMORY_KB
+                + ";iterations=" + ITERATIONS
+                + ";parallelism=" + PARALLELISM
+                + ";hashBytes=" + HASH_LENGTH_BYTES
+                + ";saltBytes=" + SALT_LENGTH_BYTES;
+    }
+
     private byte[] generateSalt() {
         byte[] salt = new byte[SALT_LENGTH_BYTES];
         SECURE_RANDOM.nextBytes(salt);

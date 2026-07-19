@@ -58,6 +58,13 @@ public class PBKDF2HashingStrategy implements HashingStrategy {
         return AlgorithmName.PBKDF2;
     }
 
+    @Override
+    public String getParametersDescription() {
+        return "prf=HMAC-SHA256;iterations=" + ITERATIONS
+                + ";keyLengthBits=" + KEY_LENGTH_BITS
+                + ";saltBytes=" + SALT_LENGTH_BYTES;
+    }
+
     private byte[] generateSalt() {
         byte[] salt = new byte[SALT_LENGTH_BYTES];
         SECURE_RANDOM.nextBytes(salt);

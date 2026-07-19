@@ -10,6 +10,17 @@
 <project name="PasswordManager" default="default" basedir=".">
     <description>Builds, tests, and runs the project PasswordManager.</description>
     <import file="nbproject/build-impl.xml"/>
+
+    <property name="benchmark.args" value=""/>
+
+    <target name="benchmark" depends="compile" description="Runs cryptographic benchmarks and exports CSV reports.">
+        <java classname="Benchmark.BenchmarkApplication" fork="true" failonerror="true">
+            <classpath>
+                <path path="${run.classpath}"/>
+            </classpath>
+            <arg line="${benchmark.args}"/>
+        </java>
+    </target>
     <!--
 
     There exist several targets which are by default empty and which can be 
